@@ -1,59 +1,65 @@
-import React, { useState, useEffect } from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import EnhancedAdminPanel from './AdminPanel.jsx'
-import AdminLogin from './AdminLogin.jsx'
-import Signup from './pages/Signup.jsx'
-import './index.css'
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
 
-// Admin Router Component
+// Admin Components
+import EnhancedAdminPanel from "./AdminPanel.jsx";
+import AdminLogin from "./AdminLogin.jsx";
+import AdminSignup from "./AdminSignup.jsx";
+
+// Client Components
+import Signup from "./pages/Signup.jsx";
+
+import "./index.css";
+
+// --------------------------
+// ADMIN ROUTER
+// --------------------------
 const AdminRouter = () => {
-  const [currentView, setCurrentView] = useState('login'); // 'login', 'signup', 'admin'
+  const [currentView, setCurrentView] = useState("login"); // login | signup | admin
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminData, setAdminData] = useState(null);
 
-  // Check if admin is already logged in
+  // Check if admin is logged in
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    const admin = localStorage.getItem('admin_user');
-    
+    const token = localStorage.getItem("admin_token");
+    const admin = localStorage.getItem("admin_user");
+
     if (token && admin) {
       setIsAuthenticated(true);
       setAdminData(JSON.parse(admin));
-      setCurrentView('admin');
+      setCurrentView("admin");
     }
   }, []);
 
-  // Handle successful login
+  // On successful login
   const handleLoginSuccess = (admin) => {
     setIsAuthenticated(true);
     setAdminData(admin);
-    setCurrentView('admin');
+    setCurrentView("admin");
   };
 
-  // Handle logout
+  // Logout
   const handleLogout = () => {
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_user");
     setIsAuthenticated(false);
     setAdminData(null);
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_user');
-    setCurrentView('login');
+    setCurrentView("login");
   };
 
-  // Handle navigation to signup
-  const handleNavigateToSignup = () => {
-    setCurrentView('signup');
-  };
+  // Navigation
+  const handleNavigateToSignup = () => setCurrentView("signup");
+  const handleNavigateToLogin = () => setCurrentView("login");
 
-  // Handle navigation to login
-  const handleNavigateToLogin = () => {
-    setCurrentView('login');
-  };
+  // --------------------------
+  // VIEW RENDERING
+  // --------------------------
 
-  // Render current view
-  if (currentView === 'signup') {
+  // Admin Signup Page
+  if (currentView === "signup") {
     return (
-      <Signup 
+      <AdminSignup
         onSignupSuccess={handleNavigateToLogin}
         onNavigateToLogin={handleNavigateToLogin}
         setCurrentPage={setCurrentView}
@@ -61,38 +67,40 @@ const AdminRouter = () => {
     );
   }
 
-  if (currentView === 'admin' && isAuthenticated) {
-    return (
-      <EnhancedAdminPanel 
-        onLogout={handleLogout}
-        onNavigateToSignup={handleNavigateToSignup}
-        adminData={adminData}
-      />
-    );
+  // Admin Panel (after login)
+  if (currentView === "admin" && isAuthenticated) {
+    return <EnhancedAdminPanel onLogout={handleLogout} adminData={adminData} />;
   }
 
-  // Default to login
+  // Admin Login Page (default)
   return (
-    <AdminLogin 
+    <AdminLogin
       onLoginSuccess={handleLoginSuccess}
       onNavigateToSignup={handleNavigateToSignup}
     />
   );
 };
 
-// Main App Router
+// --------------------------
+// MAIN APP ROUTER
+// --------------------------
 const AppRouter = () => {
   const path = window.location.pathname;
 
-  if (path === '/admin') {
+  // /admin → admin router
+  if (path === "/admin") {
     return <AdminRouter />;
   }
 
+  // Default → client app
   return <App />;
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// --------------------------
+// RENDER APP
+// --------------------------
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AppRouter />
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

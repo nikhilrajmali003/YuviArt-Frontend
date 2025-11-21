@@ -1,53 +1,62 @@
-import React, { useState } from 'react';
-import { Lock, Mail, Eye, EyeOff, Shield, Palette, Loader, UserPlus } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Lock,
+  Mail,
+  Eye,
+  EyeOff,
+  Shield,
+  Palette,
+  Loader,
+  UserPlus,
+} from "lucide-react";
 
 const AdminLogin = ({ onLoginSuccess, onNavigateToSignup }) => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     // Client-side validation
     if (!formData.email || !formData.password) {
-      setError('Please enter both email and password');
+      setError("Please enter both email and password");
       return;
     }
 
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const response = await fetch("http://localhost:8080/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('admin_token', data.token);
-        localStorage.setItem('admin_user', JSON.stringify(data.admin));
+        localStorage.setItem("admin_token", data.token);
+        localStorage.setItem("admin_user", JSON.stringify(data.admin));
         onLoginSuccess(data.admin);
       } else {
         const data = await response.json();
         if (response.status === 401) {
-          setError('Invalid email or password. Please try again.');
+          setError("Invalid email or password. Please try again.");
         } else if (response.status === 404) {
-          setError('Account not found. Please create an account first.');
+          setError("Account not found. Please create an account first.");
         } else {
-          setError(data.message || 'Login failed. Please try again.');
+          setError(data.message || "Login failed. Please try again.");
         }
       }
     } catch (err) {
-      setError('Unable to connect to server. Please check your connection.');
+      setError("Unable to connect to server. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -92,7 +101,10 @@ const AdminLogin = ({ onLoginSuccess, onNavigateToSignup }) => {
           <div className="space-y-5">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold mb-2 text-gray-300">
+              <label
+                htmlFor="email"
+                className="block text-sm font-semibold mb-2 text-gray-300"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -102,8 +114,10 @@ const AdminLogin = ({ onLoginSuccess, onNavigateToSignup }) => {
                   type="email"
                   placeholder="admin@yuviart.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  onKeyPress={(e) => e.key === "Enter" && handleSubmit(e)}
                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition"
                   disabled={loading}
                 />
@@ -112,18 +126,23 @@ const AdminLogin = ({ onLoginSuccess, onNavigateToSignup }) => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold mb-2 text-gray-300">
+              <label
+                htmlFor="password"
+                className="block text-sm font-semibold mb-2 text-gray-300"
+              >
                 Password
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  onKeyPress={(e) => e.key === "Enter" && handleSubmit(e)}
                   className="w-full pl-12 pr-12 py-3.5 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition"
                   disabled={loading}
                 />
@@ -132,9 +151,13 @@ const AdminLogin = ({ onLoginSuccess, onNavigateToSignup }) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition cursor-pointer"
                   disabled={loading}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -142,14 +165,14 @@ const AdminLogin = ({ onLoginSuccess, onNavigateToSignup }) => {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-purple-600 focus:ring-purple-500 cursor-pointer" 
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-purple-600 focus:ring-purple-500 cursor-pointer"
                   disabled={loading}
                 />
                 <span className="text-gray-400">Remember me</span>
               </label>
-              <button 
+              <button
                 type="button"
                 className="text-purple-400 hover:text-purple-300 transition cursor-pointer"
                 disabled={loading}

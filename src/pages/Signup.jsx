@@ -1,31 +1,50 @@
-import React, { useState } from 'react';
-import { Palette, Mail, Lock, User, Loader, X, ArrowLeft, CheckCircle } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Palette,
+  Mail,
+  Lock,
+  User,
+  Loader,
+  X,
+  ArrowLeft,
+  CheckCircle,
+} from "lucide-react";
 
-const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) => {
+const Signup = ({
+  onSignupSuccess,
+  onSwitchToLogin,
+  onClose,
+  selectedArtwork,
+}) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // Validate all fields
-      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-        setError('Please fill in all fields');
+      if (
+        !formData.name ||
+        !formData.email ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
+        setError("Please fill in all fields");
         setLoading(false);
         return;
       }
 
       // Name validation
       if (formData.name.length < 2) {
-        setError('Name must be at least 2 characters long');
+        setError("Name must be at least 2 characters long");
         setLoading(false);
         return;
       }
@@ -33,46 +52,46 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
       // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        setError('Please enter a valid email address');
+        setError("Please enter a valid email address");
         setLoading(false);
         return;
       }
 
       // Password validation
       if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters long');
+        setError("Password must be at least 6 characters long");
         setLoading(false);
         return;
       }
 
       // Password match validation
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match');
+        setError("Passwords do not match");
         setLoading(false);
         return;
       }
 
       // Simulate API call - Replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Mock successful registration
       const userData = {
         id: Date.now(),
         name: formData.name,
-        email: formData.email
+        email: formData.email,
       };
 
       // Call success handler
       onSignupSuccess(userData);
     } catch (err) {
-      setError('Sign up failed. Please try again.');
+      setError("Sign up failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSubmit();
     }
   };
@@ -123,8 +142,12 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
                   className="w-20 h-20 rounded-lg object-cover border border-white/10"
                 />
                 <div className="flex-1">
-                  <p className="font-semibold text-lg">{selectedArtwork.title}</p>
-                  <p className="text-purple-400 font-bold text-xl">₹{selectedArtwork.price.toLocaleString()}</p>
+                  <p className="font-semibold text-lg">
+                    {selectedArtwork.title}
+                  </p>
+                  <p className="text-purple-400 font-bold text-xl">
+                    ₹{selectedArtwork.price.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -147,7 +170,9 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
                 type="text"
                 placeholder="Full Name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 onKeyPress={handleKeyPress}
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:bg-white/10 transition-all"
               />
@@ -160,7 +185,9 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
                 type="email"
                 placeholder="Email Address"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 onKeyPress={handleKeyPress}
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:bg-white/10 transition-all"
               />
@@ -173,7 +200,9 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
                 type="password"
                 placeholder="Password (min 6 characters)"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 onKeyPress={handleKeyPress}
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:bg-white/10 transition-all"
               />
@@ -186,7 +215,9 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
                 type="password"
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
                 onKeyPress={handleKeyPress}
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:bg-white/10 transition-all"
               />
@@ -204,18 +235,18 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
                   Creating Account...
                 </>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
           </div>
 
           {/* Terms */}
           <p className="text-xs text-gray-400 text-center mt-4">
-            By signing up, you agree to our{' '}
+            By signing up, you agree to our{" "}
             <button className="text-purple-400 hover:text-purple-300 transition">
               Terms of Service
-            </button>{' '}
-            and{' '}
+            </button>{" "}
+            and{" "}
             <button className="text-purple-400 hover:text-purple-300 transition">
               Privacy Policy
             </button>
@@ -231,20 +262,13 @@ const Signup = ({ onSignupSuccess, onSwitchToLogin, onClose, selectedArtwork }) 
           {/* Login Link */}
           <div className="text-center">
             <p className="text-gray-400">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <button
                 onClick={onSwitchToLogin}
                 className="text-purple-400 font-semibold hover:text-purple-300 transition"
               >
                 Sign In
               </button>
-            </p>
-          </div>
-
-          {/* Demo Note */}
-          <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-            <p className="text-blue-300 text-sm text-center">
-              <strong>Demo Mode:</strong> Fill all fields to create account
             </p>
           </div>
         </div>
