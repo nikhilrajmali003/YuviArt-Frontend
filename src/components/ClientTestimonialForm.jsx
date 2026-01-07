@@ -1,20 +1,57 @@
 import React, { useState, useEffect } from "react";
-import { Star, Loader, CheckCircle, AlertCircle, Send, X, MessageSquare } from "lucide-react";
+import {
+  Star,
+  Loader,
+  CheckCircle,
+  AlertCircle,
+  Send,
+  X,
+  MessageSquare,
+} from "lucide-react";
 
 const API_BASE_URL = "http://localhost:8080/api";
 const USE_MOCK_DATA = true; // ✅ Always keep mock data for fallback testing
 
 // Mock testimonials (these always remain visible)
 const mockTestimonials = [
-  { id: 1, name: "Priya Sharma", text: "Absolutely stunning artwork! Exceeded expectations.", rating: 5, approved: true },
-  { id: 2, name: "Rahul Verma", text: "Professional service and incredible attention to detail.", rating: 5, approved: true },
-  { id: 3, name: "Anita Desai", text: "The custom piece brought tears to my eyes. Highly recommend!", rating: 5, approved: true },
-  { id: 4, name: "Nikhil Raj Mali", text: "Absolute Mind Blowing", rating: 5, approved: true }
+  {
+    id: 1,
+    name: "Priya Sharma",
+    text: "Absolutely stunning artwork! Exceeded expectations.",
+    rating: 5,
+    approved: true,
+  },
+  {
+    id: 2,
+    name: "Rahul Verma",
+    text: "Professional service and incredible attention to detail.",
+    rating: 5,
+    approved: true,
+  },
+  {
+    id: 3,
+    name: "Anita Desai",
+    text: "The custom piece brought tears to my eyes. Highly recommend!",
+    rating: 5,
+    approved: true,
+  },
+  {
+    id: 4,
+    name: "Nikhil Raj Mali",
+    text: "Absolute Mind Blowing",
+    rating: 5,
+    approved: true,
+  },
 ];
 
 // ============ TESTIMONIAL FORM COMPONENT ============
 const TestimonialForm = ({ onClose, onSuccess }) => {
-  const [form, setForm] = useState({ name: "", email: "", rating: 5, text: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    rating: 5,
+    text: "",
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [errors, setErrors] = useState({});
@@ -23,15 +60,19 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
   const validateForm = () => {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = "Name is required";
-    else if (form.name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
+    else if (form.name.trim().length < 2)
+      newErrors.name = "Name must be at least 2 characters";
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!form.email.trim()) newErrors.email = "Email is required";
-    else if (!emailRegex.test(form.email)) newErrors.email = "Please enter a valid email";
+    else if (!emailRegex.test(form.email))
+      newErrors.email = "Please enter a valid email";
 
     if (!form.text.trim()) newErrors.text = "Testimonial is required";
-    else if (form.text.trim().length < 10) newErrors.text = "Testimonial must be at least 10 characters";
-    else if (form.text.trim().length > 500) newErrors.text = "Testimonial must be less than 500 characters";
+    else if (form.text.trim().length < 10)
+      newErrors.text = "Testimonial must be at least 10 characters";
+    else if (form.text.trim().length > 500)
+      newErrors.text = "Testimonial must be less than 500 characters";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -48,7 +89,10 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      setMessage({ type: "error", text: "Please fix the errors before submitting" });
+      setMessage({
+        type: "error",
+        text: "Please fix the errors before submitting",
+      });
       return;
     }
 
@@ -132,13 +176,18 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
         <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           Share Your Experience
         </h2>
-        <p className="text-gray-400 text-sm">Your feedback helps us grow and inspires future clients</p>
+        <p className="text-gray-400 text-sm">
+          Your feedback helps us grow and inspires future clients
+        </p>
       </div>
 
       <div className="space-y-5">
         {/* Name Input */}
         <div>
-          <label htmlFor="name" className="block text-sm font-semibold mb-2 text-gray-300">
+          <label
+            htmlFor="name"
+            className="block text-sm font-semibold mb-2 text-gray-300"
+          >
             Full Name *
           </label>
           <input
@@ -162,7 +211,10 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
 
         {/* Email Input */}
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold mb-2 text-gray-300">
+          <label
+            htmlFor="email"
+            className="block text-sm font-semibold mb-2 text-gray-300"
+          >
             Email Address *
           </label>
           <input
@@ -182,12 +234,16 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
               {errors.email}
             </p>
           )}
-          <p className="text-gray-500 text-xs mt-1">Your email will not be publicly displayed</p>
+          <p className="text-gray-500 text-xs mt-1">
+            Your email will not be publicly displayed
+          </p>
         </div>
 
         {/* Star Rating */}
         <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-300">Your Rating *</label>
+          <label className="block text-sm font-semibold mb-2 text-gray-300">
+            Your Rating *
+          </label>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -215,7 +271,10 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
 
         {/* Testimonial Textarea */}
         <div>
-          <label htmlFor="text" className="block text-sm font-semibold mb-2 text-gray-300">
+          <label
+            htmlFor="text"
+            className="block text-sm font-semibold mb-2 text-gray-300"
+          >
             Your Testimonial *
           </label>
           <textarea
@@ -239,7 +298,13 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
                 </p>
               )}
             </div>
-            <p className={`text-xs ${characterCount > maxCharacters * 0.9 ? "text-yellow-400" : "text-gray-500"}`}>
+            <p
+              className={`text-xs ${
+                characterCount > maxCharacters * 0.9
+                  ? "text-yellow-400"
+                  : "text-gray-500"
+              }`}
+            >
               {characterCount}/{maxCharacters}
             </p>
           </div>
@@ -300,7 +365,15 @@ const ClientTestimonialForm = ({ onClose, onSuccess }) => {
       <div className="text-center mt-8">
         <button
           onClick={() => setShowModal(true)}
-          className="group bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 inline-flex items-center gap-2"
+          className="
+mx-auto
+bg-purple-800 text-white
+border border-white/20
+px-6 py-4 rounded-xl font-semibold
+hover:bg-purple-600 hover:border-purple-600
+transition-all duration-300
+flex items-center justify-center gap-2
+"
         >
           <MessageSquare className="w-5 h-5 group-hover:rotate-12 transition-transform" />
           Share Your Feedback
@@ -309,7 +382,10 @@ const ClientTestimonialForm = ({ onClose, onSuccess }) => {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowModal(false)}
+          />
           <div className="relative z-10 w-full max-w-2xl">
             <TestimonialForm
               onClose={() => {
