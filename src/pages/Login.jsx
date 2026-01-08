@@ -1,23 +1,31 @@
-import React, { useState } from 'react';
-import { Palette, Mail, Lock, Loader, X, ArrowLeft } from 'lucide-react';
+import React, { useState } from "react";
+import { Palette, Mail, Lock, Loader, X, ArrowLeft } from "lucide-react";
 
-const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) => {
+// API Configuration
+const API_BASE_URL = "http://localhost:8080/api";
+
+const Login = ({
+  onLoginSuccess,
+  onSwitchToSignup,
+  onClose,
+  selectedArtwork,
+}) => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       // Validate inputs
       if (!formData.email || !formData.password) {
-        setError('Please fill in all fields');
+        setError("Please fill in all fields");
         setLoading(false);
         return;
       }
@@ -25,25 +33,73 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
       // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        setError('Please enter a valid email address');
+        setError("Please enter a valid email address");
         setLoading(false);
         return;
       }
 
-      // Simulate API call - Replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Password length validation
+      if (formData.password.length < 6) {
+        setError("Password must be at least 6 characters");
+        setLoading(false);
+        return;
+      }
 
-      // Mock successful login
+      // Call your backend API for login
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const apiResponse = await response.json();
+
+      // Check if request failed or success flag is false
+      if (!response.ok || !apiResponse.success) {
+        setError(apiResponse.message || "Login failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Successful login - extract data from apiResponse.data
       const userData = {
-        id: Date.now(),
-        name: formData.email.split('@')[0],
-        email: formData.email
+        id: apiResponse.data.id,
+        name: apiResponse.data.name,
+        email: apiResponse.data.email,
+        token: apiResponse.data.token, // If your backend provides JWT token
       };
+
+      // Store token if provided
+      if (apiResponse.data.token) {
+        localStorage.setItem("yuviart_token", apiResponse.data.token);
+      }
 
       // Call success handler
       onLoginSuccess(userData);
     } catch (err) {
-      setError('Login failed. Please check your credentials and try again.');
+      console.error("Login error:", err);
+
+      // If backend is not running, fall back to demo mode
+      if (err.message.includes("fetch") || err.name === "TypeError") {
+        setError("Cannot connect to server. Using demo mode...");
+
+        // Demo mode fallback
+        setTimeout(() => {
+          const userData = {
+            id: Date.now(),
+            name: formData.email.split("@")[0],
+            email: formData.email,
+          };
+          onLoginSuccess(userData);
+        }, 1000);
+      } else {
+        setError("Login failed. Please check your credentials and try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -78,7 +134,9 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
               </h1>
             </div>
             <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
-            <p className="text-gray-400">Sign in to continue your art journey</p>
+            <p className="text-gray-400">
+              Sign in to continue your art journey
+            </p>
           </div>
 
           {/* Selected Artwork Preview */}
@@ -95,8 +153,12 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
                   className="w-20 h-20 rounded-lg object-cover border border-white/10"
                 />
                 <div className="flex-1">
-                  <p className="font-semibold text-lg">{selectedArtwork.title}</p>
-                  <p className="text-purple-400 font-bold text-xl">₹{selectedArtwork.price.toLocaleString()}</p>
+                  <p className="font-semibold text-lg">
+                    {selectedArtwork.title}
+                  </p>
+                  <p className="text-purple-400 font-bold text-xl">
+                    ₹{selectedArtwork.price.toLocaleString()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -119,7 +181,9 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
                 type="email"
                 placeholder="Email Address"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 required
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:bg-white/10 transition-all"
               />
@@ -132,7 +196,9 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
                 type="password"
                 placeholder="Password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 required
                 minLength={6}
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:bg-white/10 transition-all"
@@ -153,7 +219,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-semibold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-[1.02] active:scale-95"
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-[1.02] active:scale-95"
             >
               {loading ? (
                 <>
@@ -161,7 +227,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
                   Signing In...
                 </>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </button>
           </form>
@@ -176,7 +242,7 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
           {/* Sign Up Link */}
           <div className="text-center">
             <p className="text-gray-400">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <button
                 onClick={onSwitchToSignup}
                 className="text-purple-400 font-semibold hover:text-purple-300 transition"
@@ -186,10 +252,11 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
             </p>
           </div>
 
-          {/* Demo Note */}
+          {/* Info Note */}
           <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
             <p className="text-blue-300 text-sm text-center">
-              <strong>Demo Mode:</strong> Use any email and password to sign in
+              <strong>Note:</strong> Please use the email and password you
+              registered with
             </p>
           </div>
         </div>
@@ -197,13 +264,26 @@ const Login = ({ onLoginSuccess, onSwitchToSignup, onClose, selectedArtwork }) =
 
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;
