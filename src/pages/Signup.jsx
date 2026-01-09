@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 // API Configuration
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "http://localhost:8080";
 
 const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
   const [formData, setFormData] = useState({
@@ -157,7 +157,7 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
 
     try {
       // Redirect to backend OAuth endpoint
-      window.location.href = `${API_BASE_URL}/auth/google`;
+      window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     } catch (err) {
       console.error("Google login error:", err);
       setError("Google login failed. Please try again.");
@@ -273,10 +273,8 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
               </svg>
               <div className="text-left">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    /
-                  </span>
-                  <span className="text-white">uviArt</span>
+                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"></span>
+                  <span className="text-purple-700 mr-auto">YuviArt</span>
                 </h1>
               </div>
             </div>
