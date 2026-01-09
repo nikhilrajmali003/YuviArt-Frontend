@@ -12,8 +12,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-// API Configuration
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "http://localhost:8080/api";
 
 const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
   const [formData, setFormData] = useState({
@@ -36,7 +35,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
     } else if (window.history.length > 1) {
       window.history.back();
     } else {
-      // Fallback - go to home
       window.location.href = "/";
     }
   };
@@ -47,7 +45,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
     setLoading(true);
 
     try {
-      // Validation
       if (
         !formData.name ||
         !formData.email ||
@@ -59,7 +56,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
         return;
       }
 
-      // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         setError("Please enter a valid email address");
@@ -79,7 +75,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
         return;
       }
 
-      // Call backend API for signup
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: "POST",
         headers: {
@@ -101,7 +96,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
         return;
       }
 
-      // Successful signup
       const userData = {
         id: apiResponse.data.id,
         name: apiResponse.data.name,
@@ -109,7 +103,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
         token: apiResponse.data.token,
       };
 
-      // Store token if provided
       if (apiResponse.data.token) {
         localStorage.setItem("yuviart_token", apiResponse.data.token);
       }
@@ -117,7 +110,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
       setLoading(false);
       setSuccess(true);
 
-      // Call success handler after delay
       setTimeout(() => {
         if (onSignupSuccess) {
           onSignupSuccess(userData);
@@ -126,7 +118,6 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
     } catch (err) {
       console.error("Signup error:", err);
 
-      // Demo mode fallback if backend is not running
       if (err.message.includes("fetch") || err.name === "TypeError") {
         setError("Cannot connect to server. Using demo mode...");
         setTimeout(() => {
@@ -150,14 +141,15 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
     }
   };
 
-  // Google OAuth Login
   const handleGoogleLogin = () => {
     setError("");
     setLoading(true);
 
     try {
-      // Redirect to backend OAuth endpoint
-      window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+      window.location.href = `${API_BASE_URL.replace(
+        "/api",
+        ""
+      )}/oauth2/authorization/google`;
     } catch (err) {
       console.error("Google login error:", err);
       setError("Google login failed. Please try again.");
@@ -189,7 +181,20 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
           <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6">
             Welcome to YuviArt community
           </p>
-          <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 sm:py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base">
+          <button
+            onClick={() => {
+              if (onSignupSuccess) {
+                onSignupSuccess({
+                  id: formData.id,
+                  name: formData.name,
+                  email: formData.email,
+                });
+              } else {
+                window.location.href = "/";
+              }
+            }}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 sm:py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base"
+          >
             Continue to Dashboard
           </button>
         </div>
@@ -272,9 +277,8 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
                 </defs>
               </svg>
               <div className="text-left">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"></span>
-                  <span className="text-purple-700 mr-auto">YuviArt</span>
+                <h1 className="flex items-center text-2xl sm:text-3xl font-bold">
+                  <span className="text-purple-800">YuviArt</span>
                 </h1>
               </div>
             </div>
@@ -459,7 +463,30 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-3 transform hover:scale-[1.02] active:scale-[0.98] text-sm"
+                className="
+    w-full
+    bg-blue-600
+    hover:bg-blue-700
+    text-white
+    py-3
+    rounded-xl
+    font-bold
+    transition-all
+    duration-300
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+    flex
+    items-center
+    justify-center
+    gap-1
+    mt-3
+    shadow-lg
+    hover:shadow-blue-600/40
+    transform
+    hover:scale-[1.02]
+    active:scale-[0.98]
+    text-sm
+  "
               >
                 {loading ? (
                   <>
@@ -472,14 +499,12 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
               </button>
             </div>
 
-            {/* Divider */}
             <div className="flex items-center gap-3 my-3">
               <div className="flex-1 h-px bg-white/10" />
               <span className="text-gray-500 text-xs">or continue with</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
 
-            {/* Google Login Button */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -583,11 +608,9 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
         .animate-scaleIn {
           animation: scaleIn 0.5s ease-out;
         }
-        
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
