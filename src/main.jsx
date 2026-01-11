@@ -5,7 +5,6 @@ import App from "./App.jsx";
 // Admin Components
 import EnhancedAdminPanel from "./AdminPanel.jsx";
 import AdminLogin from "./AdminLogin.jsx";
-import AdminSignup from "./AdminSignup.jsx";
 
 // Client Components
 import Signup from "./pages/Signup.jsx";
