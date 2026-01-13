@@ -24,7 +24,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 // API Configuration
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 const USE_MOCK_DATA = false;
 const FORMSPREE_FORM_ID = "mvgdadvw";
 const ARTIST_EMAIL = "yuviraj7232@gmail.com";
@@ -1083,6 +1084,7 @@ transition-all duration-300 flex items-center gap-2"
       </section>
 
       {/* Gallery Section */}
+      {/* Gallery Section */}
       <section id="gallery" className="relative py-20 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -1096,6 +1098,7 @@ transition-all duration-300 flex items-center gap-2"
             </p>
           </div>
 
+          {/* Category Filter */}
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {["all", "sketches", "portraits", "paintings", "custom"].map(
               (cat) => (
@@ -1114,17 +1117,30 @@ transition-all duration-300 flex items-center gap-2"
             )}
           </div>
 
+          {/* Gallery Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredArtworks.map((art) => (
+            {filteredArtworks.map((art, index) => (
               <div
-                key={art.id}
+                key={`gallery-${art.id}-${index}`}
                 className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-purple-400/50 transition-all duration-500 hover:scale-105"
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={art.imageUrl}
+                    src={
+                      art.imageUrl?.startsWith("http")
+                        ? art.imageUrl // External URL
+                        : art.imageUrl?.startsWith("/api/upload/images/")
+                        ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
+                        : art.imageUrl // Frontend public folder images (like /images/...)
+                    }
                     alt={art.title}
                     className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=Image+Not+Found";
+                      console.error("Image failed to load:", art.imageUrl);
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
@@ -1135,7 +1151,7 @@ transition-all duration-300 flex items-center gap-2"
                       <div className="flex gap-1">
                         {[...Array(art.rating)].map((_, i) => (
                           <Star
-                            key={i}
+                            key={`gallery-star-${art.id}-${i}`}
                             className="w-4 h-4 fill-yellow-400 text-yellow-400"
                           />
                         ))}
@@ -1181,20 +1197,29 @@ transition-all duration-300 flex items-center gap-2"
             <>
               {/* Artworks Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {artworks.slice(0, 6).map((art) => (
+                {artworks.map((art, index) => (
                   <div
-                    key={art.id}
+                    key={`shop-${art.id}-${index}`}
                     className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden hover:border-purple-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20"
                   >
                     {/* Image Container */}
                     <div className="relative overflow-hidden">
                       <img
-                        src={art.imageUrl}
+                        src={
+                          art.imageUrl?.startsWith("http")
+                            ? art.imageUrl // External URL
+                            : art.imageUrl?.startsWith("/api/upload/images/")
+                            ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
+                            : art.imageUrl // Frontend public folder images (like /images/...)
+                        }
                         alt={`${art.title} - ${art.description}`}
                         loading="lazy"
                         className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
-                          e.target.src = "/images/placeholder.jpg";
+                          e.target.onerror = null;
+                          e.target.src =
+                            "https://via.placeholder.com/400x500?text=Image+Not+Found";
+                          console.error("Image failed to load:", art.imageUrl);
                         }}
                       />
 
@@ -1222,7 +1247,7 @@ transition-all duration-300 flex items-center gap-2"
                       >
                         {[...Array(art.rating)].map((_, i) => (
                           <Star
-                            key={i}
+                            key={`shop-star-${art.id}-${i}`}
                             className="w-4 h-4 fill-yellow-400 text-yellow-400"
                             aria-hidden="true"
                           />
