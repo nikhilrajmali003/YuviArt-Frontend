@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../services/api"; // Adjust path as needed
 
 const sanitizeInput = (input) =>
   input?.toString().trim().replace(/[<>]/g, "") || "";

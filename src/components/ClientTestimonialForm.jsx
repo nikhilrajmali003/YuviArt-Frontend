@@ -9,7 +9,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../services/api"; // Adjust path as needed
 const USE_MOCK_DATA = true; // ✅ Always keep mock data for fallback testing
 
 // ============ TESTIMONIAL FORM COMPONENT ============
