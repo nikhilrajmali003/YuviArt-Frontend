@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// ✅ Backend API base URL
-const API_BASE_URL = 'http://localhost:8080/api';
+// ✅ Backend API base URL - reads from environment variable
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
+// Debug log to verify URL is correct
+console.log('🔗 API Base URL:', API_BASE_URL);
 
 // 🌈 Global Axios Config — handles CORS and JSON headers
 axios.defaults.baseURL = API_BASE_URL;
@@ -92,11 +95,9 @@ export const artworkAPI = {
     }
   },
 
-  // FIXED: Changed template literal to function call
   getById: (id) => axios.get(`/artworks/${id}`),
   getByCategory: (category) => axios.get(`/artworks/category/${category}`),
   
-  // Additional useful methods
   create: (artworkData) => axios.post('/artworks', artworkData),
   update: (id, artworkData) => axios.put(`/artworks/${id}`, artworkData),
   delete: (id) => axios.delete(`/artworks/${id}`)
@@ -108,18 +109,15 @@ export const artworkAPI = {
 export const orderAPI = {
   create: (orderData) => axios.post('/orders', orderData),
   
-  // FIXED: Changed template literal to function call
   getById: (id) => axios.get(`/orders/${id}`),
   getByEmail: (email) => axios.get(`/orders/customer/${email}`),
   getAll: () => axios.get('/orders'),
 
-  // Payment integrations
   createRazorpayOrder: (amount) =>
     axios.post('/orders/payment/razorpay', { amount }),
   createStripePayment: (amount) =>
     axios.post('/orders/payment/stripe', { amount }),
   
-  // Update order status
   updateStatus: (id, status) => 
     axios.put(`/orders/${id}/status`, { status })
 };
@@ -128,7 +126,6 @@ export const orderAPI = {
 // ==================== 🌟 TESTIMONIAL API ====================
 //
 export const testimonialAPI = {
-  // ✅ Fetch backend testimonials + merge with mock data
   getAll: async () => {
     const mockTestimonials = [
       {
@@ -158,7 +155,6 @@ export const testimonialAPI = {
       const response = await axios.get('/testimonials');
       const backendData = response.data || [];
       
-      // Return backend data if available, otherwise use mock
       return backendData.length > 0 ? backendData : mockTestimonials;
     } catch (error) {
       console.warn('⚠️ Using mock testimonials (backend offline)');
@@ -208,6 +204,9 @@ export const authAPI = {
   logout: () => axios.post('/auth/logout'),
   getCurrentUser: () => axios.get('/auth/me')
 };
+
+// ✅ Export API_BASE_URL so other files can use it
+export { API_BASE_URL };
 
 // ✅ Export all APIs as one object
 export default {
