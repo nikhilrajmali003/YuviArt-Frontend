@@ -217,6 +217,3 @@ export default {
   analyticsAPI,
   authAPI
 };
-
-// ✅ Also export individual APIs for named imports
-export { artworkAPI, orderAPI, testimonialAPI, contactAPI, analyticsAPI, authAPI };
