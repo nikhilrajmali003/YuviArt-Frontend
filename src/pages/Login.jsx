@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Lock, Loader, X, ArrowLeft, Eye, EyeOff } from "lucide-react";
-
-const API_BASE_URL = "http://localhost:8080/api";
+// At the top of Login.jsx
+import { API_BASE_URL } from "../services/api"; // Adjust path as needed
 
 const Login = ({
   onLoginSuccess,
