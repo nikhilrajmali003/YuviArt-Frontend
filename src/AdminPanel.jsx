@@ -22,7 +22,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import { API_BASE_URL } from "../services/api"; // Adjust path as needed
+import { API_BASE_URL } from "../services/api.js"; // Adjust path as needed
 
 const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const [artworks, setArtworks] = useState([]);
@@ -186,7 +186,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/testimonials/${id}/approve`,
-        { method: "PUT" }
+        { method: "PUT" },
       );
       if (response.ok) {
         showSuccess("✅ Approved!");
@@ -226,7 +226,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
 
   const pendingTestimonials = useMemo(
     () => testimonials.filter((t) => !t.approved),
-    [testimonials]
+    [testimonials],
   );
 
   const stats = {
@@ -525,11 +525,11 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                               (data.views /
                                 Math.max(
                                   ...dynamicAnalytics.chartData.map(
-                                    (d) => d.views
-                                  )
+                                    (d) => d.views,
+                                  ),
                                 )) *
                                 100,
-                              100
+                              100,
                             )}%`,
                           }}
                         />
@@ -562,10 +562,10 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                             idx === 0
                               ? "bg-gradient-to-r from-cyan-500 to-cyan-400"
                               : idx === 1
-                              ? "bg-gradient-to-r from-blue-600 to-blue-400"
-                              : idx === 2
-                              ? "bg-gradient-to-r from-green-600 to-green-400"
-                              : "bg-gradient-to-r from-indigo-600 to-indigo-400"
+                                ? "bg-gradient-to-r from-blue-600 to-blue-400"
+                                : idx === 2
+                                  ? "bg-gradient-to-r from-green-600 to-green-400"
+                                  : "bg-gradient-to-r from-indigo-600 to-indigo-400"
                           }`}
                           style={{ width: `${cat.percentage}%` }}
                         />
