@@ -12,7 +12,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-const API_BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../services/api"; // Adjust path as needed
 
 const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
   const [formData, setFormData] = useState({
@@ -148,7 +148,7 @@ const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
     try {
       window.location.href = `${API_BASE_URL.replace(
         "/api",
-        ""
+        "",
       )}/oauth2/authorization/google`;
     } catch (err) {
       console.error("Google login error:", err);

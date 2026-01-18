@@ -275,7 +275,7 @@ const ArtistPortfolio = () => {
     setWishlistItems((prev) =>
       prev.includes(artId)
         ? prev.filter((id) => id !== artId)
-        : [...prev, artId]
+        : [...prev, artId],
     );
   };
 
@@ -471,7 +471,7 @@ const ArtistPortfolio = () => {
               timeStyle: "long",
             }),
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -492,7 +492,7 @@ const ArtistPortfolio = () => {
 
       // Fallback: Open default email client with pre-filled form
       const subject = encodeURIComponent(
-        `🎨 YuviArt Commission Request - ${contactForm.artType}`
+        `🎨 YuviArt Commission Request - ${contactForm.artType}`,
       );
       const body = encodeURIComponent(
         `Hello,\n\n` +
@@ -507,14 +507,14 @@ const ArtistPortfolio = () => {
           `Submitted on: ${new Date().toLocaleString("en-IN", {
             timeZone: "Asia/Kolkata",
           })}\n` +
-          `From: YuviArt Website`
+          `From: YuviArt Website`,
       );
 
       // Open email client
       window.location.href = `mailto:${ARTIST_EMAIL}?subject=${subject}&body=${body}`;
 
       alert(
-        '📧 Opening your email client...\n\nPlease click "Send" to complete your commission request.\n\nIf your email client doesn\'t open, please email directly to:\nyuviraj7232@gmail.com'
+        '📧 Opening your email client...\n\nPlease click "Send" to complete your commission request.\n\nIf your email client doesn\'t open, please email directly to:\nyuviraj7232@gmail.com',
       );
     } finally {
       setContactSubmitting(false);
@@ -540,7 +540,7 @@ const ArtistPortfolio = () => {
 
     if (USE_MOCK_DATA) {
       alert(
-        `Order created successfully!\nTotal: ₹${totalCartValue}\nItems: ${cart.length}`
+        `Order created successfully!\nTotal: ₹${totalCartValue}\nItems: ${cart.length}`,
       );
       setCart([]);
       setCartOpen(false);
@@ -1113,7 +1113,7 @@ transition-all duration-300 flex items-center gap-2"
                 >
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </button>
-              )
+              ),
             )}
           </div>
 
@@ -1130,8 +1130,8 @@ transition-all duration-300 flex items-center gap-2"
                       art.imageUrl?.startsWith("http")
                         ? art.imageUrl // External URL
                         : art.imageUrl?.startsWith("/api/upload/images/")
-                        ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
-                        : art.imageUrl // Frontend public folder images (like /images/...)
+                          ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
+                          : art.imageUrl // Frontend public folder images (like /images/...)
                     }
                     alt={art.title}
                     className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
@@ -1209,8 +1209,8 @@ transition-all duration-300 flex items-center gap-2"
                           art.imageUrl?.startsWith("http")
                             ? art.imageUrl // External URL
                             : art.imageUrl?.startsWith("/api/upload/images/")
-                            ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
-                            : art.imageUrl // Frontend public folder images (like /images/...)
+                              ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
+                              : art.imageUrl // Frontend public folder images (like /images/...)
                         }
                         alt={`${art.title} - ${art.description}`}
                         loading="lazy"
@@ -1444,7 +1444,7 @@ transition-all duration-300 flex items-center gap-2"
                               year: "numeric",
                               month: "long",
                               day: "numeric",
-                            }
+                            },
                           )}
                         </p>
                       )}
@@ -1708,7 +1708,7 @@ flex items-center justify-center gap-2
                     >
                       {cat}
                     </button>
-                  )
+                  ),
                 )}
               </div>
             </div>
