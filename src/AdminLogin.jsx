@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 
-import { API_BASE_URL } from "../services/api"; // Adjust path as needed
+import { API_BASE_URL } from "../services/api.js";
 
 const sanitizeInput = (input) =>
   input?.toString().trim().replace(/[<>]/g, "") || "";

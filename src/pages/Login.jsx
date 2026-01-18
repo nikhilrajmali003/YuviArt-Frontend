@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Lock, Loader, X, ArrowLeft, Eye, EyeOff } from "lucide-react";
 // At the top of Login.jsx
-import { API_BASE_URL } from "../services/api"; // Adjust path as needed
+import { API_BASE_URL } from "../services/api.js"; // Adjust path as needed
 
 const Login = ({
   onLoginSuccess,
@@ -102,7 +102,7 @@ const Login = ({
     try {
       window.location.href = `${API_BASE_URL.replace(
         "/api",
-        ""
+        "",
       )}/oauth2/authorization/google`;
     } catch (err) {
       console.error("Google login error:", err);

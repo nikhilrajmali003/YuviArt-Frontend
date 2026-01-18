@@ -12,7 +12,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-import { API_BASE_URL } from "../services/api"; // Adjust path as needed
+import { API_BASE_URL } from "../services/api.js"; // Adjust path as needed
 
 const ResponsiveSignup = ({ onClose, onSwitchToLogin, onSignupSuccess }) => {
   const [formData, setFormData] = useState({
