@@ -26,6 +26,8 @@ import Signup from "./pages/Signup";
 // API Configuration
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const BACKEND_BASE_URL = API_BASE_URL.replace("/api", ""); // ✅ For image URLs
+
 const USE_MOCK_DATA = false;
 const FORMSPREE_FORM_ID = "mvgdadvw";
 const ARTIST_EMAIL = "yuviraj7232@gmail.com";
