@@ -63,8 +63,8 @@ const AdminDashboard = () => {
         setArtworks(artworksData);
       }
 
-      // Fetch testimonials
-      const testimonialsRes = await fetch(`${API_BASE_URL}/testimonials`);
+      // Fetch ALL testimonials (approved + pending) for admin
+      const testimonialsRes = await fetch(`${API_BASE_URL}/testimonials/all`);
       if (testimonialsRes.ok) {
         const testimonialsData = await testimonialsRes.json();
         setTestimonials(testimonialsData);
