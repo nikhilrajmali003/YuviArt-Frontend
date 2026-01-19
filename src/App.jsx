@@ -1130,7 +1130,7 @@ transition-all duration-300 flex items-center gap-2"
                       art.imageUrl?.startsWith("http")
                         ? art.imageUrl // External URL
                         : art.imageUrl?.startsWith("/api/upload/images/")
-                          ? `http://localhost:8080${art.imageUrl}` // Backend uploaded images
+                          ? `${BACKEND_BASE_URL}${art.imageUrl}` // ✅ Use deployed backend URL
                           : art.imageUrl // Frontend public folder images (like /images/...)
                     }
                     alt={art.title}
