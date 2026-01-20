@@ -21,7 +21,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import { API_BASE_URL } from "./services/api.js";
+const API_BASE_URL = "http://localhost:8080/api";
 
 const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const [artworks, setArtworks] = useState([]);
@@ -89,9 +89,15 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
+      } else {
+        console.error("Failed to fetch orders:", response.status);
+        // Set empty array if orders endpoint fails
+        setOrders([]);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
+      // Set empty array if orders endpoint fails
+      setOrders([]);
     }
   };
 
@@ -941,17 +947,23 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                           ))}
                         </div>
                       </div>
-                      <p className="text-cyan-200 mb-4">"{t.text}"</p>
+                      <p className="text-cyan-200 mb-3 italic">"{t.text}"</p>
+                      <p className="text-xs text-cyan-400/50 mb-4">
+                        Submitted:{" "}
+                        {new Date(
+                          t.createdAt || Date.now(),
+                        ).toLocaleDateString()}
+                      </p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => approveTestimonial(t.id)}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg"
+                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg hover:shadow-green-500/30"
                         >
                           <Check className="w-4 h-4" /> Approve
                         </button>
                         <button
                           onClick={() => rejectTestimonial(t.id)}
-                          className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg"
+                          className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg hover:shadow-red-500/30"
                         >
                           <X className="w-4 h-4" /> Reject
                         </button>
@@ -968,38 +980,57 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                 Approved Testimonials (
                 {testimonials.filter((t) => t.approved).length})
               </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {testimonials
-                  .filter((t) => t.approved)
-                  .map((t) => (
-                    <div
-                      key={t.id}
-                      className="bg-slate-900/50 border border-cyan-500/20 p-5 rounded-xl hover:border-cyan-500/40 transition-all"
-                    >
-                      <div className="flex justify-between mb-3">
-                        <div>
-                          <h4 className="font-bold text-cyan-100">{t.name}</h4>
-                          <p className="text-sm text-cyan-300/70">{t.email}</p>
-                        </div>
-                        <div className="flex">
-                          {[...Array(t.rating)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-cyan-200 mb-4">"{t.text}"</p>
-                      <button
-                        onClick={() => deleteTestimonial(t.id)}
-                        className="w-full bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition font-semibold text-red-400"
+              {testimonials.filter((t) => t.approved).length === 0 ? (
+                <div className="text-center py-12">
+                  <MessageSquare className="w-16 h-16 text-cyan-400/30 mx-auto mb-4" />
+                  <p className="text-cyan-300/50">
+                    No approved testimonials yet
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {testimonials
+                    .filter((t) => t.approved)
+                    .map((t) => (
+                      <div
+                        key={t.id}
+                        className="bg-slate-900/50 border border-cyan-500/20 p-5 rounded-xl hover:border-cyan-500/40 transition-all"
                       >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </button>
-                    </div>
-                  ))}
-              </div>
+                        <div className="flex justify-between mb-3">
+                          <div>
+                            <h4 className="font-bold text-cyan-100">
+                              {t.name}
+                            </h4>
+                            <p className="text-sm text-cyan-300/70">
+                              {t.email}
+                            </p>
+                          </div>
+                          <div className="flex">
+                            {[...Array(t.rating)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-cyan-200 mb-3 italic">"{t.text}"</p>
+                        <p className="text-xs text-cyan-400/50 mb-4">
+                          Approved:{" "}
+                          {new Date(
+                            t.updatedAt || t.createdAt || Date.now(),
+                          ).toLocaleDateString()}
+                        </p>
+                        <button
+                          onClick={() => deleteTestimonial(t.id)}
+                          className="w-full bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition font-semibold text-red-400"
+                        >
+                          <Trash2 className="w-4 h-4" /> Delete
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           </div>
         )}
