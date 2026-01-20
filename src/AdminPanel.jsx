@@ -4,7 +4,6 @@ import {
   Trash2,
   Check,
   X,
-  Menu,
   Search,
   AlertCircle,
   Loader,
@@ -22,7 +21,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import { API_BASE_URL } from "./services/api.js";
+const API_BASE_URL = "http://localhost:8080/api";
 
 const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const [artworks, setArtworks] = useState([]);
@@ -32,6 +31,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [orders, setOrders] = useState([]);
 
   const MOCK_ARTWORKS_COUNT = 14;
   const MOCK_TESTIMONIALS_COUNT = 3;
@@ -53,6 +53,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   useEffect(() => {
     fetchArtworks();
     fetchTestimonials();
+    fetchOrders();
   }, []);
 
   const fetchArtworks = async () => {
@@ -79,6 +80,18 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       }
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`);
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
     }
   };
 
@@ -189,11 +202,33 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
         { method: "PUT" },
       );
       if (response.ok) {
-        showSuccess("✅ Approved!");
+        showSuccess("✅ Review Approved Successfully!");
         fetchTestimonials();
+      } else {
+        alert("❌ Failed to approve review");
       }
     } catch (error) {
       console.error("Error:", error);
+      alert("⚠️ Error approving review");
+    }
+  };
+
+  const rejectTestimonial = async (id) => {
+    if (window.confirm("Are you sure you want to reject this review?")) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/testimonials/${id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          showSuccess("✅ Review Rejected!");
+          fetchTestimonials();
+        } else {
+          alert("❌ Failed to reject review");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("⚠️ Error rejecting review");
+      }
     }
   };
 
@@ -260,19 +295,28 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
     const baseViews = totalArtworksCount * 150;
     const totalViews =
       baseViews + Math.floor(Math.random() * totalArtworksCount * 50);
-    const totalOrders =
-      Math.floor(totalTestimonialsCount * 0.65) +
-      Math.floor(totalArtworksCount * 0.15);
+
+    // Real order data from API
+    const totalOrders = orders.length;
+    const completedOrders = orders.filter(
+      (o) => o.status === "DELIVERED",
+    ).length;
+    const pendingOrders = orders.filter(
+      (o) =>
+        o.status === "PENDING" ||
+        o.status === "CONFIRMED" ||
+        o.status === "PROCESSING" ||
+        o.status === "SHIPPED",
+    ).length;
 
     return {
       totalViews: totalViews || 2100,
       todayViews: Math.floor(totalViews * 0.025) || 52,
       weeklyViews: Math.floor(totalViews * 0.16) || 336,
       monthlyViews: Math.floor(totalViews * 0.65) || 1365,
-      totalOrders: totalOrders || 4,
-      pendingOrders: Math.floor(totalOrders * 0.12) || 1,
-      completedOrders:
-        totalOrders - Math.floor(totalOrders * 0.12) || totalOrders,
+      totalOrders: totalOrders,
+      pendingOrders: pendingOrders,
+      completedOrders: completedOrders,
       activeUsers: Math.floor(totalViews * 0.04) || 84,
       chartData: [
         {
@@ -327,11 +371,10 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               .sort((a, b) => b.percentage - a.percentage)
           : [{ category: "No Data", views: 0, percentage: 0 }],
     };
-  }, [artworks, testimonials]);
+  }, [artworks, testimonials, orders]);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,_#0b3a6a_0%,_#020617_70%)] text-white">
-      {/* Success Toast */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white">
       {successMessage && (
         <div className="fixed top-4 right-4 z-50 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-2">
           <Check className="w-5 h-5" />
@@ -339,26 +382,24 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-[#0c1e35]/90 backdrop-blur-2xl border-b border-cyan-500/20 shadow-2xl">
+      <div className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-cyan-500/20 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center shadow-lg">
                 <Package className="w-6 h-6 text-cyan-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]">
+                <h1 className="text-2xl font-bold text-cyan-300">
                   YuviArt Admin
                 </h1>
-
                 <p className="text-xs text-cyan-300/70">Management Dashboard</p>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border border-red-500/50 rounded-xl transition-all duration-300 text-red-400 hover:text-red-300 hover:shadow-lg hover:shadow-red-500/20"
+              className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 border border-red-500/50 rounded-xl transition-all duration-300 text-red-400"
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -368,7 +409,6 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-3 mb-8">
           {[
             { id: "dashboard", icon: BarChart3, label: "Dashboard" },
@@ -389,8 +429,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/50"
-                  : "bg-[#0c1e35]/50 text-cyan-300/70 hover:bg-[#0c1e35]/80 border border-cyan-500/20 hover:border-cyan-500/40 hover:text-cyan-300"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg"
+                  : "bg-slate-800/50 text-cyan-300/70 hover:bg-slate-800/80 border border-cyan-500/20"
               }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -399,14 +439,12 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
           ))}
         </div>
 
-        {/* Dashboard */}
         {activeTab === "dashboard" && (
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-cyan-100 mb-6">
               Dashboard Overview
             </h2>
 
-            {/* Main Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
@@ -440,10 +478,10 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               ].map((stat, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#0c1e35]/50 backdrop-blur-xl border border-cyan-500/20 p-6 rounded-2xl hover:shadow-2xl hover:shadow-cyan-500/30 hover:border-cyan-500/40 transition-all duration-300 group"
+                  className="bg-slate-800/50 backdrop-blur-xl border border-cyan-500/20 p-6 rounded-2xl hover:shadow-2xl hover:border-cyan-500/40 transition-all group"
                 >
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
                   >
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
@@ -460,9 +498,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               ))}
             </div>
 
-            {/* Secondary Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-5 rounded-2xl hover:border-cyan-500/40 transition-all">
+              <div className="bg-slate-800/50 border border-cyan-500/20 p-5 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-cyan-300 text-sm">Today's Views</span>
                   <Activity className="w-5 h-5 text-cyan-400" />
@@ -471,7 +508,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   {dynamicAnalytics.todayViews}
                 </p>
               </div>
-              <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-5 rounded-2xl hover:border-cyan-500/40 transition-all">
+              <div className="bg-slate-800/50 border border-cyan-500/20 p-5 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-cyan-300 text-sm">Weekly Views</span>
                   <TrendingUp className="w-5 h-5 text-blue-400" />
@@ -480,7 +517,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   {dynamicAnalytics.weeklyViews.toLocaleString()}
                 </p>
               </div>
-              <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-5 rounded-2xl hover:border-cyan-500/40 transition-all">
+              <div className="bg-slate-800/50 border border-cyan-500/20 p-5 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-cyan-300 text-sm">Total Orders</span>
                   <ShoppingCart className="w-5 h-5 text-green-400" />
@@ -489,7 +526,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   {dynamicAnalytics.totalOrders}
                 </p>
               </div>
-              <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-5 rounded-2xl hover:border-cyan-500/40 transition-all">
+              <div className="bg-slate-800/50 border border-cyan-500/20 p-5 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-cyan-300 text-sm">Active Users</span>
                   <Users className="w-5 h-5 text-pink-400" />
@@ -500,10 +537,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               </div>
             </div>
 
-            {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Weekly Activity Chart */}
-              <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-6 rounded-2xl hover:border-cyan-500/40 transition-all">
+              <div className="bg-slate-800/50 border border-cyan-500/20 p-6 rounded-2xl">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-cyan-100">
                   <TrendingUp className="w-5 h-5 text-cyan-400" />
                   Weekly Activity
@@ -517,20 +552,11 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                           {data.views} views · {data.orders} orders
                         </span>
                       </div>
-                      <div className="relative h-2 bg-[#0a1a2e] rounded-full overflow-hidden">
+                      <div className="relative h-2 bg-slate-900 rounded-full overflow-hidden">
                         <div
                           className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full transition-all duration-500"
                           style={{
-                            width: `${Math.min(
-                              (data.views /
-                                Math.max(
-                                  ...dynamicAnalytics.chartData.map(
-                                    (d) => d.views,
-                                  ),
-                                )) *
-                                100,
-                              100,
-                            )}%`,
+                            width: `${Math.min((data.views / Math.max(...dynamicAnalytics.chartData.map((d) => d.views))) * 100, 100)}%`,
                           }}
                         />
                       </div>
@@ -539,8 +565,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                 </div>
               </div>
 
-              {/* Category Performance */}
-              <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-6 rounded-2xl hover:border-cyan-500/40 transition-all">
+              <div className="bg-slate-800/50 border border-cyan-500/20 p-6 rounded-2xl">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-cyan-100">
                   <BarChart3 className="w-5 h-5 text-blue-400" />
                   Category Performance
@@ -556,7 +581,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                           {cat.views.toLocaleString()} views
                         </span>
                       </div>
-                      <div className="relative h-3 bg-[#0a1a2e] rounded-full overflow-hidden">
+                      <div className="relative h-3 bg-slate-900 rounded-full overflow-hidden">
                         <div
                           className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${
                             idx === 0
@@ -579,7 +604,6 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               </div>
             </div>
 
-            {/* Quick Stats Row */}
             <div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 border border-cyan-500/30 p-6 rounded-2xl">
               <h3 className="text-lg font-bold mb-4 text-cyan-100">
                 Order Status
@@ -608,20 +632,18 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
           </div>
         )}
 
-        {/* Upload Form */}
         {activeTab === "upload" && (
-          <div className="bg-[#0c1e35]/50 backdrop-blur-xl border border-cyan-500/20 p-8 rounded-2xl shadow-xl">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-cyan-500/20 p-8 rounded-2xl">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-cyan-100">
               <Upload className="w-6 h-6 text-cyan-400" />
               Upload New Artwork
             </h2>
             <div className="space-y-5">
-              {/* Image Upload with Preview */}
               <div>
                 <label className="block mb-3 font-semibold text-cyan-200">
                   Artwork Image *
                 </label>
-                <div className="border-2 border-dashed border-cyan-500/30 rounded-2xl p-8 text-center hover:border-cyan-400/50 transition-all duration-300 cursor-pointer bg-[#0a1a2e]/50">
+                <div className="border-2 border-dashed border-cyan-500/30 rounded-2xl p-8 text-center hover:border-cyan-400/50 transition-all cursor-pointer bg-slate-900/50">
                   <input
                     type="file"
                     accept="image/*"
@@ -684,10 +706,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
-                    className={`w-full px-4 py-3.5 bg-[#0a1a2e]/50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-cyan-100 placeholder-cyan-400/30 ${
-                      errors.title
-                        ? "border-red-500"
-                        : "border-cyan-500/20 focus:border-cyan-400/50"
+                    className={`w-full px-4 py-3.5 bg-slate-900/50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition text-cyan-100 placeholder-cyan-400/30 ${
+                      errors.title ? "border-red-500" : "border-cyan-500/20"
                     }`}
                   />
                   {errors.title && (
@@ -704,7 +724,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full px-4 py-3.5 bg-[#0a1a2e]/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-400/50 text-cyan-100"
+                    className="w-full px-4 py-3.5 bg-slate-900/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-cyan-100"
                   >
                     <option value="portraits">Portraits</option>
                     <option value="sketches">Sketches</option>
@@ -724,10 +744,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className={`w-full px-4 py-3.5 bg-[#0a1a2e]/50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none text-cyan-100 placeholder-cyan-400/30 ${
-                    errors.description
-                      ? "border-red-500"
-                      : "border-cyan-500/20 focus:border-cyan-400/50"
+                  className={`w-full px-4 py-3.5 bg-slate-900/50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none text-cyan-100 placeholder-cyan-400/30 ${
+                    errors.description ? "border-red-500" : "border-cyan-500/20"
                   }`}
                   rows="4"
                 />
@@ -750,10 +768,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
-                    className={`w-full px-4 py-3.5 bg-[#0a1a2e]/50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-cyan-100 placeholder-cyan-400/30 ${
-                      errors.price
-                        ? "border-red-500"
-                        : "border-cyan-500/20 focus:border-cyan-400/50"
+                    className={`w-full px-4 py-3.5 bg-slate-900/50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-cyan-100 placeholder-cyan-400/30 ${
+                      errors.price ? "border-red-500" : "border-cyan-500/20"
                     }`}
                   />
                 </div>
@@ -770,7 +786,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                         rating: parseInt(e.target.value),
                       })
                     }
-                    className="w-full px-4 py-3.5 bg-[#0a1a2e]/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-400/50 text-cyan-100"
+                    className="w-full px-4 py-3.5 bg-slate-900/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-cyan-100"
                     min="1"
                     max="5"
                   />
@@ -788,7 +804,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                         stockQuantity: parseInt(e.target.value),
                       })
                     }
-                    className="w-full px-4 py-3.5 bg-[#0a1a2e]/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-400/50 text-cyan-100"
+                    className="w-full px-4 py-3.5 bg-slate-900/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-cyan-100"
                     min="1"
                   />
                 </div>
@@ -798,7 +814,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={uploading}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-6 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:scale-[1.02] active:scale-95"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-6 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transform hover:scale-[1.02] active:scale-95"
               >
                 {uploading ? (
                   <>
@@ -816,7 +832,6 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
           </div>
         )}
 
-        {/* Artworks Management */}
         {activeTab === "artworks" && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -827,13 +842,13 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   placeholder="Search artworks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-[#0c1e35]/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-400/50 text-cyan-100 placeholder-cyan-400/30"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-800/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 text-cyan-100 placeholder-cyan-400/30"
                 />
               </div>
               <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
-                className="px-4 py-3.5 bg-[#0c1e35]/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-400/50 sm:w-48 text-cyan-100"
+                className="px-4 py-3.5 bg-slate-800/50 border border-cyan-500/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 sm:w-48 text-cyan-100"
               >
                 <option value="all">All Categories</option>
                 <option value="portraits">Portraits</option>
@@ -852,7 +867,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                 {filteredArtworks.map((artwork) => (
                   <div
                     key={artwork.id}
-                    className="bg-[#0c1e35]/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-2xl hover:shadow-cyan-500/30"
+                    className="bg-slate-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-2xl"
                   >
                     <div className="relative aspect-square overflow-hidden">
                       <img
@@ -898,7 +913,6 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
           </div>
         )}
 
-        {/* Testimonials */}
         {activeTab === "testimonials" && (
           <div className="space-y-6">
             {pendingTestimonials.length > 0 && (
@@ -911,7 +925,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   {pendingTestimonials.map((t) => (
                     <div
                       key={t.id}
-                      className="bg-[#0c1e35]/50 border border-cyan-500/30 p-5 rounded-xl hover:border-cyan-500/50 transition-all"
+                      className="bg-slate-800/50 border border-cyan-500/30 p-5 rounded-xl hover:border-cyan-500/50 transition-all"
                     >
                       <div className="flex justify-between mb-3">
                         <div>
@@ -931,15 +945,15 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => approveTestimonial(t.id)}
-                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg hover:shadow-green-500/30"
+                          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg"
                         >
                           <Check className="w-4 h-4" /> Approve
                         </button>
                         <button
-                          onClick={() => deleteTestimonial(t.id)}
-                          className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg hover:shadow-red-500/30"
+                          onClick={() => rejectTestimonial(t.id)}
+                          className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all font-semibold shadow-lg"
                         >
-                          <X className="w-4 h-4" /> Delete
+                          <X className="w-4 h-4" /> Reject
                         </button>
                       </div>
                     </div>
@@ -948,8 +962,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
               </div>
             )}
 
-            {/* Approved Testimonials */}
-            <div className="bg-[#0c1e35]/50 border border-cyan-500/20 p-6 rounded-2xl">
+            <div className="bg-slate-800/50 border border-cyan-500/20 p-6 rounded-2xl">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-cyan-100">
                 <MessageSquare className="w-6 h-6 text-green-400" />
                 Approved Testimonials (
@@ -961,7 +974,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                   .map((t) => (
                     <div
                       key={t.id}
-                      className="bg-[#0a1a2e]/50 border border-cyan-500/20 p-5 rounded-xl hover:border-cyan-500/40 transition-all"
+                      className="bg-slate-900/50 border border-cyan-500/20 p-5 rounded-xl hover:border-cyan-500/40 transition-all"
                     >
                       <div className="flex justify-between mb-3">
                         <div>
