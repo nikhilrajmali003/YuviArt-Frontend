@@ -24,14 +24,34 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 // API Configuration
+// API Configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-const BACKEND_BASE_URL = API_BASE_URL.replace("/api", ""); // ✅ For image URLs
+  import.meta.env.VITE_API_URL || "https://yuvi-backend-jkam.onrender.com/api";
+
+// ✅ FIXED: Properly construct backend URL for images
+const BACKEND_BASE_URL = API_BASE_URL.endsWith("/api")
+  ? API_BASE_URL.replace(/\/api$/, "")
+  : API_BASE_URL;
 
 const USE_MOCK_DATA = false;
 const FORMSPREE_FORM_ID = "mvgdadvw";
 const ARTIST_EMAIL = "yuviraj7232@gmail.com";
+// Helper function to get full image URL
+const getImageUrl = (imageUrl) => {
+  if (!imageUrl)
+    return "https://via.placeholder.com/400x300?text=Image+Not+Found";
 
+  // If it's already a full URL, return as-is
+  if (imageUrl.startsWith("http")) return imageUrl;
+
+  // If it's an API upload path, prepend backend URL
+  if (imageUrl.startsWith("/api/upload/")) {
+    return `${BACKEND_BASE_URL}${imageUrl}`;
+  }
+
+  // Otherwise, it's a local public folder image
+  return imageUrl;
+};
 // Mock data fallback
 const mockArtworks = [
   {
@@ -827,7 +847,7 @@ drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]
                       className="flex gap-4 bg-white/5 rounded-lg p-4 hover:bg-white/10 transition"
                     >
                       <img
-                        src={item.imageUrl}
+                        src={getImageUrl(item.imageUrl)} // ✅ Use helper function
                         alt={item.title}
                         className="w-20 h-20 object-cover rounded"
                       />
@@ -922,7 +942,7 @@ drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]
                         className="flex gap-4 bg-white/5 rounded-lg p-4 hover:bg-white/10 transition"
                       >
                         <img
-                          src={art.imageUrl}
+                          src={getImageUrl(art.imageUrl)} // ✅ Use helper function
                           alt={art.title}
                           className="w-20 h-20 object-cover rounded"
                         />
@@ -1128,13 +1148,7 @@ transition-all duration-300 flex items-center gap-2"
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={
-                      art.imageUrl?.startsWith("http")
-                        ? art.imageUrl // External URL
-                        : art.imageUrl?.startsWith("/api/upload/images/")
-                          ? `${BACKEND_BASE_URL}${art.imageUrl}` // ✅ Use deployed backend URL
-                          : art.imageUrl // Frontend public folder images (like /images/...)
-                    }
+                    src={getImageUrl(art.imageUrl)}
                     alt={art.title}
                     className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => {
@@ -1144,6 +1158,7 @@ transition-all duration-300 flex items-center gap-2"
                       console.error("Image failed to load:", art.imageUrl);
                     }}
                   />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                       <h3 className="font-bold text-xl mb-2">{art.title}</h3>
@@ -1207,20 +1222,13 @@ transition-all duration-300 flex items-center gap-2"
                     {/* Image Container */}
                     <div className="relative overflow-hidden">
                       <img
-                        src={
-                          art.imageUrl?.startsWith("http")
-                            ? art.imageUrl // External URL
-                            : art.imageUrl?.startsWith("/api/upload/images/")
-                              ? `${BACKEND_BASE_URL}${art.imageUrl}` // ✅ Use deployed backend URL
-                              : art.imageUrl // Frontend public folder images (like /images/...)
-                        }
-                        alt={`${art.title} - ${art.description}`}
-                        loading="lazy"
-                        className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                        src={getImageUrl(art.imageUrl)}
+                        alt={art.title}
+                        className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src =
-                            "https://via.placeholder.com/400x500?text=Image+Not+Found";
+                            "https://via.placeholder.com/400x300?text=Image+Not+Found";
                           console.error("Image failed to load:", art.imageUrl);
                         }}
                       />
