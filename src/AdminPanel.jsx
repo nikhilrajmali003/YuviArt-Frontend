@@ -70,7 +70,16 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       setLoading(false);
     }
   };
-
+  // ✅ Add this helper function at the top, after imports
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl)
+      return "https://via.placeholder.com/400x300?text=Image+Not+Found";
+    if (imageUrl.startsWith("http")) return imageUrl;
+    if (imageUrl.startsWith("/api/upload/")) {
+      return `https://yuvi-backend-jkam.onrender.com${imageUrl}`;
+    }
+    return imageUrl;
+  };
   // Admin Panel - Fetch ALL testimonials
   // ✅ Make sure this is in your admin panel
   const fetchAllTestimonials = async () => {
@@ -171,7 +180,24 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       setErrors({ ...errors, image: "" });
     }
   };
-
+  const deleteArtwork = async (id) => {
+    if (window.confirm("Delete this artwork?")) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/artworks/${id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          showSuccess("✅ Deleted successfully!");
+          fetchArtworks();
+        } else {
+          alert("❌ Failed to delete artwork");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("⚠️ Error deleting artwork");
+      }
+    }
+  };
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Title required";
@@ -861,15 +887,8 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     className="bg-slate-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-2xl"
                   >
                     <div className="relative aspect-square overflow-hidden">
-                      <img
-                        src={
-                          artwork.imageUrl?.startsWith("http")
-                            ? artwork.imageUrl
-                            : `http://localhost:8080${artwork.imageUrl}`
-                        }
-                        alt={artwork.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
+                      // ✅ USE THIS src={getImageUrl(artwork.imageUrl)}Fix
+                      admin panel: add deleteArtwork function and fix image URLs
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => deleteArtwork(artwork.id)}
