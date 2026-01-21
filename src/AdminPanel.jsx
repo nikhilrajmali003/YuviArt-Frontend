@@ -887,8 +887,6 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     className="bg-slate-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-2xl"
                   >
                     <div className="relative aspect-square overflow-hidden">
-                      // ✅ USE THIS src={getImageUrl(artwork.imageUrl)}Fix
-                      admin panel: add deleteArtwork function and fix image URLs
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => deleteArtwork(artwork.id)}
