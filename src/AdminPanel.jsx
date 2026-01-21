@@ -52,7 +52,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
 
   useEffect(() => {
     fetchArtworks();
-    fetchTestimonials();
+    fetchAllTestimonials();
     fetchOrders();
   }, []);
 
@@ -71,15 +71,52 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
     }
   };
 
-  const fetchTestimonials = async () => {
+  // Admin Panel - Fetch ALL testimonials
+  const fetchAllTestimonials = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/testimonials/all`);
+      const response = await fetch(`${API_BASE_URL}/admin/testimonials`);
+      const data = await response.json();
+      setTestimonials(data);
+    } catch (error) {
+      console.error("Failed to fetch testimonials:", error);
+    }
+  };
+  const approveTestimonial = async (id) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/admin/testimonials/${id}/approve`,
+        {
+          method: "PUT",
+        },
+      );
       if (response.ok) {
-        const data = await response.json();
-        setTestimonials(data);
+        // Refresh testimonials list
+        fetchAllTestimonials();
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Failed to approve testimonial:", error);
+    }
+  };
+
+  // Admin Panel - Delete testimonial
+  const deleteTestimonial = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/testimonials/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        // Refresh testimonials list
+        fetchAllTestimonials();
+      }
+    } catch (error) {
+      console.error("Failed to delete testimonial:", error);
+    }
+  };
+
+  // ✅ ADD THIS NEW FUNCTION (for reject button)
+  const rejectTestimonial = async (id) => {
+    if (window.confirm("Are you sure you want to reject this review?")) {
+      await deleteTestimonial(id); // Reuse delete function
     }
   };
 
@@ -182,75 +219,6 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       alert("⚠️ Error uploading");
     } finally {
       setUploading(false);
-    }
-  };
-
-  const deleteArtwork = async (id) => {
-    if (window.confirm("Delete this artwork?")) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/artworks/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          showSuccess("✅ Deleted successfully!");
-          fetchArtworks();
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    }
-  };
-
-  const approveTestimonial = async (id) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/testimonials/${id}/approve`,
-        { method: "PUT" },
-      );
-      if (response.ok) {
-        showSuccess("✅ Review Approved Successfully!");
-        fetchTestimonials();
-      } else {
-        alert("❌ Failed to approve review");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("⚠️ Error approving review");
-    }
-  };
-
-  const rejectTestimonial = async (id) => {
-    if (window.confirm("Are you sure you want to reject this review?")) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/testimonials/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          showSuccess("✅ Review Rejected!");
-          fetchTestimonials();
-        } else {
-          alert("❌ Failed to reject review");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("⚠️ Error rejecting review");
-      }
-    }
-  };
-
-  const deleteTestimonial = async (id) => {
-    if (window.confirm("Delete this testimonial?")) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/testimonials/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          showSuccess("✅ Deleted!");
-          fetchTestimonials();
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
     }
   };
 
