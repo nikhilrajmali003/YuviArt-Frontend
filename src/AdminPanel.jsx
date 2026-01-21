@@ -52,7 +52,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
 
   useEffect(() => {
     fetchArtworks();
-    fetchAllTestimonials();
+    fetchAllTestimonials(); // ✅ Make sure this is called
     fetchOrders();
   }, []);
 
@@ -72,6 +72,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   };
 
   // Admin Panel - Fetch ALL testimonials
+  // ✅ Make sure this is in your admin panel
   const fetchAllTestimonials = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/testimonials`);
@@ -87,6 +88,7 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
       // ✅ Ensure data is an array
       if (Array.isArray(data)) {
         setTestimonials(data);
+        console.log("✅ Fetched testimonials:", data.length);
       } else {
         console.error("Testimonials data is not an array:", data);
         setTestimonials([]);
