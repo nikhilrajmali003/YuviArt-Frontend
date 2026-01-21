@@ -75,10 +75,25 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const fetchAllTestimonials = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/testimonials`);
+
+      if (!response.ok) {
+        console.error("Failed to fetch testimonials:", response.status);
+        setTestimonials([]); // ✅ Set empty array on error
+        return;
+      }
+
       const data = await response.json();
-      setTestimonials(data);
+
+      // ✅ Ensure data is an array
+      if (Array.isArray(data)) {
+        setTestimonials(data);
+      } else {
+        console.error("Testimonials data is not an array:", data);
+        setTestimonials([]);
+      }
     } catch (error) {
       console.error("Failed to fetch testimonials:", error);
+      setTestimonials([]); // ✅ Set empty array on error
     }
   };
   const approveTestimonial = async (id) => {
