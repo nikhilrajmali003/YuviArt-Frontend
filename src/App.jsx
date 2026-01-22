@@ -37,6 +37,7 @@ const USE_MOCK_DATA = false;
 const FORMSPREE_FORM_ID = "mvgdadvw";
 const ARTIST_EMAIL = "yuviraj7232@gmail.com";
 // Helper function to get full image URL
+// Helper function to get full image URL
 const getImageUrl = (imageUrl) => {
   if (!imageUrl) return "https://placehold.co/400x300?text=Image+Not+Found";
 
@@ -846,13 +847,9 @@ drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]
                       className="flex gap-4 bg-white/5 rounded-lg p-4 hover:bg-white/10 transition"
                     >
                       <img
-                        src={getImageUrl(art.imageUrl)}
-                        alt={art.title}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            "https://placehold.co/400x300?text=Image+Not+Found";
-                        }}
+                        src={getImageUrl(item.imageUrl)} // ✅ Use helper function
+                        alt={item.title}
+                        className="w-20 h-20 object-cover rounded"
                       />
                       <div className="flex-1">
                         <h4 className="font-semibold">{item.title}</h4>
@@ -945,13 +942,9 @@ drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]
                         className="flex gap-4 bg-white/5 rounded-lg p-4 hover:bg-white/10 transition"
                       >
                         <img
-                          src={getImageUrl(art.imageUrl)}
+                          src={getImageUrl(art.imageUrl)} // ✅ Use helper function
                           alt={art.title}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src =
-                              "https://placehold.co/400x300?text=Image+Not+Found";
-                          }}
+                          className="w-20 h-20 object-cover rounded"
                         />
                         <div className="flex-1">
                           <h4 className="font-semibold">{art.title}</h4>
@@ -1156,11 +1149,14 @@ transition-all duration-300 flex items-center gap-2"
                 <div className="relative overflow-hidden">
                   <img
                     src={getImageUrl(art.imageUrl)}
-                    alt={art.title}
+                    alt={`${art.title} - ${art.description}`}
+                    loading="lazy"
+                    className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src =
-                        "https://placehold.co/400x300?text=Image+Not+Found";
+                        "https://placehold.co/400x500?text=Image+Not+Found";
+                      console.error("Image failed to load:", art.imageUrl);
                     }}
                   />
 
@@ -1228,11 +1224,14 @@ transition-all duration-300 flex items-center gap-2"
                     <div className="relative overflow-hidden">
                       <img
                         src={getImageUrl(art.imageUrl)}
-                        alt={art.title}
+                        alt={`${art.title} - ${art.description}`}
+                        loading="lazy"
+                        className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src =
-                            "https://placehold.co/400x300?text=Image+Not+Found";
+                            "https://placehold.co/400x500?text=Image+Not+Found";
+                          console.error("Image failed to load:", art.imageUrl);
                         }}
                       />
 
