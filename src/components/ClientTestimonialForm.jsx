@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { API_BASE_URL } from "../services/api"; // Adjust path as needed
-const USE_MOCK_DATA = true; // ✅ Always keep mock data for fallback testing
+const USE_MOCK_DATA = false; // ✅ CHANGED: Enable real backend submissions
 
 // ============ TESTIMONIAL FORM COMPONENT ============
 const TestimonialForm = ({ onClose, onSuccess }) => {
