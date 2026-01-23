@@ -228,18 +228,48 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
     setUploading(true);
 
     try {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach((key) => {
-        formDataToSend.append(key, formData[key]);
-      });
-      formDataToSend.append("image", selectedImage);
+      // Step 1: Upload image to Cloudinary
+      const imageFormData = new FormData();
+      imageFormData.append("file", selectedImage);
+      imageFormData.append("folder", "artworks");
 
-      const response = await fetch(`${API_BASE_URL}/artworks/with-image`, {
+      console.log("📤 Uploading image to Cloudinary...");
+
+      const imageResponse = await fetch(`${API_BASE_URL}/upload/images`, {
         method: "POST",
-        body: formDataToSend,
+        body: imageFormData,
       });
 
-      if (response.ok) {
+      if (!imageResponse.ok) {
+        throw new Error("Image upload failed");
+      }
+
+      const imageData = await imageResponse.json();
+      console.log("✅ Image uploaded:", imageData.imageUrl);
+
+      // Step 2: Create artwork with Cloudinary URL
+      const artworkData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        rating: formData.rating,
+        stockQuantity: formData.stockQuantity,
+        available: formData.available,
+        imageUrl: imageData.imageUrl, // ✅ Use Cloudinary URL
+      };
+
+      console.log("📤 Creating artwork with data:", artworkData);
+
+      const artworkResponse = await fetch(`${API_BASE_URL}/artworks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(artworkData),
+      });
+
+      if (artworkResponse.ok) {
         showSuccess("✅ Artwork uploaded successfully!");
         setFormData({
           title: "",
@@ -255,11 +285,12 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
         setErrors({});
         fetchArtworks();
       } else {
-        alert("❌ Upload failed");
+        const error = await artworkResponse.json();
+        alert("❌ Upload failed: " + (error.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("⚠️ Error uploading");
+      alert("⚠️ Error uploading: " + error.message);
     } finally {
       setUploading(false);
     }
@@ -887,6 +918,20 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     className="bg-slate-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-2xl"
                   >
                     <div className="relative aspect-square overflow-hidden">
+                      {/* ✅ ADD IMAGE HERE */}
+                      <img
+                        src={getImageUrl(artwork.imageUrl)}
+                        alt={artwork.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          console.error(
+                            "Image failed to load:",
+                            artwork.imageUrl,
+                          );
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=Image+Not+Available";
+                        }}
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => deleteArtwork(artwork.id)}
