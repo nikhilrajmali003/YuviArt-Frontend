@@ -71,14 +71,28 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
     }
   };
   // ✅ Add this helper function at the top, after imports
+  // ✅ IMPROVED getImageUrl function
   const getImageUrl = (imageUrl) => {
-    if (!imageUrl)
-      return "https://via.placeholder.com/400x300?text=Image+Not+Found";
-    if (imageUrl.startsWith("http")) return imageUrl;
-    if (imageUrl.startsWith("/api/upload/")) {
-      return `https://yuvi-backend-jkam.onrender.com${imageUrl}`;
+    if (!imageUrl) {
+      return "https://via.placeholder.com/400x300?text=No+Image";
     }
-    return imageUrl;
+
+    // If it's already a full Cloudinary URL, use it
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+      return imageUrl;
+    }
+
+    // If it's an old local path, show "Re-upload Required" placeholder
+    if (imageUrl.startsWith("/api/upload/")) {
+      console.warn("⚠️ Old local image path detected:", imageUrl);
+      console.warn(
+        "   This artwork needs to be re-uploaded through admin panel",
+      );
+      return "https://via.placeholder.com/400x300?text=Re-upload+Required&fontSize=16";
+    }
+
+    // Fallback for unexpected formats
+    return "https://via.placeholder.com/400x300?text=Invalid+Image+URL";
   };
   // Admin Panel - Fetch ALL testimonials
   // ✅ Make sure this is in your admin panel
@@ -917,22 +931,39 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
                     key={artwork.id}
                     className="bg-slate-800/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 group hover:shadow-2xl"
                   >
-                    <div className="relative aspect-square overflow-hidden">
-                      {/* ✅ ADD IMAGE HERE */}
+                    <div className="relative aspect-square overflow-hidden bg-slate-900">
                       <img
                         src={getImageUrl(artwork.imageUrl)}
                         alt={artwork.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${
+                          artwork.imageUrl &&
+                          !artwork.imageUrl.startsWith("http")
+                            ? "opacity-40 blur-sm"
+                            : ""
+                        }`}
                         onError={(e) => {
                           console.error(
-                            "Image failed to load:",
+                            "❌ Image failed to load:",
                             artwork.imageUrl,
                           );
+                          console.error("   Artwork ID:", artwork.id);
+                          console.error("   Artwork Title:", artwork.title);
                           e.target.src =
-                            "https://via.placeholder.com/400x300?text=Image+Not+Available";
+                            "https://via.placeholder.com/400x300?text=Image+Load+Failed";
+                          e.target.classList.add("opacity-50");
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+
+                      {/* ✅ Warning badge for old images */}
+                      {artwork.imageUrl &&
+                        !artwork.imageUrl.startsWith("http") && (
+                          <div className="absolute top-2 left-2 bg-yellow-500/90 text-black px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            Re-upload Required
+                          </div>
+                        )}
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <button
                           onClick={() => deleteArtwork(artwork.id)}
                           className="absolute bottom-4 right-4 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white p-3 rounded-xl transition-all shadow-xl hover:scale-110"
