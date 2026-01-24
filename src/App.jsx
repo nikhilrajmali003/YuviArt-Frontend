@@ -1184,6 +1184,7 @@ transition-all duration-300 flex items-center gap-2"
       </section>
 
       {/* Shop Section */}
+      {/* Shop Section */}
       <section id="shop" className="relative py-20 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -1197,6 +1198,42 @@ transition-all duration-300 flex items-center gap-2"
               Own a piece of timeless artistry
             </p>
           </div>
+
+          {/* ✅ DEBUG INFO - Remove in production */}
+          {artworks.length > 0 && (
+            <div className="mb-8 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                <p className="text-yellow-400 font-bold">
+                  🔍 Debug Info (Remove this section in production)
+                </p>
+              </div>
+              <div className="bg-black/50 p-3 rounded overflow-auto max-h-60">
+                <p className="text-xs text-gray-400 mb-2">
+                  Total Artworks: {artworks.length} | Old Paths:{" "}
+                  {
+                    artworks.filter((a) =>
+                      a.imageUrl?.startsWith("/api/upload/"),
+                    ).length
+                  }
+                </p>
+                <pre className="text-xs text-gray-300">
+                  {JSON.stringify(
+                    artworks.slice(0, 3).map((a) => ({
+                      id: a.id,
+                      title: a.title,
+                      imageUrl: a.imageUrl,
+                      isOldPath: a.imageUrl?.startsWith("/api/upload/"),
+                      transformedUrl:
+                        getImageUrl(a.imageUrl).substring(0, 80) + "...",
+                    })),
+                    null,
+                    2,
+                  )}
+                </pre>
+              </div>
+            </div>
+          )}
 
           {/* Empty State */}
           {artworks.length === 0 ? (
@@ -1213,95 +1250,144 @@ transition-all duration-300 flex items-center gap-2"
             </div>
           ) : (
             <>
+              {/* Category Filter */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                {["all", "sketches", "portraits", "paintings", "custom"].map(
+                  (cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                        selectedCategory === cat
+                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50"
+                          : "bg-white/5 backdrop-blur-sm border border-white/10 text-gray-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </button>
+                  ),
+                )}
+              </div>
+
               {/* Artworks Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {artworks.map((art, index) => (
-                  <div
-                    key={`shop-${art.id}-${index}`}
-                    className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden hover:border-purple-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20"
-                  >
-                    {/* Image Container */}
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={getImageUrl(art.imageUrl)}
-                        alt={`${art.title} - ${art.description}`}
-                        loading="lazy"
-                        className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            "https://placehold.co/400x500?text=Image+Not+Found";
-                          console.error("Image failed to load:", art.imageUrl);
-                        }}
-                      />
+                {filteredArtworks.map((art, index) => {
+                  const imageUrl = getImageUrl(art.imageUrl);
+                  const isOldPath = art.imageUrl?.startsWith("/api/upload/");
 
-                      {/* Wishlist Button */}
-                      <button
-                        onClick={() => handleWishlist(art.id)}
-                        aria-label={`${
-                          isInWishlist(art.id) ? "Remove from" : "Add to"
-                        } wishlist`}
-                        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-black"
-                      >
-                        <Heart
-                          className={`w-5 h-5 transition-all ${
-                            isInWishlist(art.id)
-                              ? "fill-pink-400 text-pink-400"
-                              : "text-white hover:text-pink-400"
-                          }`}
+                  return (
+                    <div
+                      key={`shop-${art.id}-${index}`}
+                      className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden hover:border-purple-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/20"
+                    >
+                      {/* Image Container */}
+                      <div className="relative overflow-hidden bg-slate-900">
+                        <img
+                          src={imageUrl}
+                          alt={`${art.title} - ${art.description}`}
+                          loading="lazy"
+                          className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            console.error(
+                              "❌ Image failed to load:",
+                              art.imageUrl,
+                            );
+                            console.error("   Artwork ID:", art.id);
+                            console.error("   Artwork Title:", art.title);
+                            console.error("   Transformed URL:", imageUrl);
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://placehold.co/400x500?text=Image+Not+Found";
+                            e.target.classList.add("opacity-50");
+                          }}
                         />
-                      </button>
 
-                      {/* Rating Stars */}
-                      <div
-                        className="absolute bottom-4 left-4 flex gap-1"
-                        aria-label={`Rating: ${art.rating} out of 5 stars`}
-                      >
-                        {[...Array(art.rating)].map((_, i) => (
-                          <Star
-                            key={`shop-star-${art.id}-${i}`}
-                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                            aria-hidden="true"
-                          />
-                        ))}
-                      </div>
-                    </div>
+                        {/* ✅ Warning badge for old images */}
+                        {isOldPath && (
+                          <div className="absolute top-4 left-4 bg-yellow-500/90 text-black px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 z-10">
+                            <AlertCircle className="w-3 h-3" />
+                            Re-upload Required
+                          </div>
+                        )}
 
-                    {/* Card Content */}
-                    <div className="p-6">
-                      <h3 className="text-2xl font-bold mb-2">{art.title}</h3>
-                      <p className="text-gray-400 mb-4 line-clamp-2">
-                        {art.description}
-                      </p>
-
-                      {/* Price and CTA */}
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <span className="text-2xl sm:text-3xl font-bold text-yellow-400">
-                          ₹{art.price.toLocaleString("en-IN")}
-                        </span>
-
+                        {/* Wishlist Button */}
                         <button
-                          onClick={() => handleAddToCart(art)}
-                          disabled={addingToCart === art.id}
-                          className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-full font-extrabold hover:shadow-lg hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-black"
+                          onClick={() => handleWishlist(art.id)}
+                          aria-label={`${
+                            isInWishlist(art.id) ? "Remove from" : "Add to"
+                          } wishlist`}
+                          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-black z-10"
                         >
-                          {addingToCart === art.id ? (
-                            <span className="flex items-center justify-center gap-2">
-                              <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-                              Adding...
-                            </span>
-                          ) : isInCart(art.id) ? (
-                            "✓ In Cart"
-                          ) : user ? (
-                            "Add to Cart"
-                          ) : (
-                            "Buy"
-                          )}
+                          <Heart
+                            className={`w-5 h-5 transition-all ${
+                              isInWishlist(art.id)
+                                ? "fill-pink-400 text-pink-400"
+                                : "text-white hover:text-pink-400"
+                            }`}
+                          />
                         </button>
+
+                        {/* Rating Stars */}
+                        <div
+                          className="absolute bottom-4 left-4 flex gap-1 z-10"
+                          aria-label={`Rating: ${art.rating} out of 5 stars`}
+                        >
+                          {[...Array(art.rating)].map((_, i) => (
+                            <Star
+                              key={`shop-star-${art.id}-${i}`}
+                              className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                              aria-hidden="true"
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Card Content */}
+                      <div className="p-6">
+                        <h3 className="text-2xl font-bold mb-2">{art.title}</h3>
+                        <p className="text-gray-400 mb-4 line-clamp-2">
+                          {art.description}
+                        </p>
+
+                        {/* Price and CTA */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <span className="text-2xl sm:text-3xl font-bold text-yellow-400">
+                            ₹{art.price.toLocaleString("en-IN")}
+                          </span>
+
+                          <button
+                            onClick={() => handleAddToCart(art)}
+                            disabled={addingToCart === art.id || isOldPath}
+                            className={`w-full sm:w-auto px-6 py-3 rounded-full font-extrabold transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-black ${
+                              isOldPath
+                                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                : addingToCart === art.id
+                                  ? "bg-yellow-500 text-black cursor-wait"
+                                  : isInCart(art.id)
+                                    ? "bg-green-500 text-white"
+                                    : "bg-yellow-500 hover:bg-yellow-400 text-black hover:shadow-lg hover:shadow-yellow-500/50 hover:scale-105"
+                            }`}
+                          >
+                            {isOldPath ? (
+                              "Unavailable"
+                            ) : addingToCart === art.id ? (
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                                Adding...
+                              </span>
+                            ) : isInCart(art.id) ? (
+                              "✓ In Cart"
+                            ) : user ? (
+                              "Add to Cart"
+                            ) : (
+                              "Buy Now"
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Secure Payment Badge */}
