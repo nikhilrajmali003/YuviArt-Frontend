@@ -22,36 +22,13 @@ import {
 import ClientTestimonialForm from "./components/ClientTestimonialForm";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import api, { getImageUrl, API_BASE_URL } from "./services/api";
+import { AlertCircle } from "lucide-react";
 
-// API Configuration
-// API Configuration
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://yuvi-backend-jkam.onrender.com/api";
-
-// ✅ FIXED: Properly construct backend URL for images
-const BACKEND_BASE_URL = API_BASE_URL.endsWith("/api")
-  ? API_BASE_URL.replace(/\/api$/, "")
-  : API_BASE_URL;
-
+// ✅ Constants Moved to api.js or handled via env
 const USE_MOCK_DATA = false;
 const FORMSPREE_FORM_ID = "mvgdadvw";
 const ARTIST_EMAIL = "yuviraj7232@gmail.com";
-// Helper function to get full image URL
-// Helper function to get full image URL
-const getImageUrl = (imageUrl) => {
-  if (!imageUrl) return "https://placehold.co/400x300?text=Image+Not+Found";
-
-  // If it's already a full URL, return as-is
-  if (imageUrl.startsWith("http")) return imageUrl;
-
-  // If it's an API upload path, prepend backend URL
-  if (imageUrl.startsWith("/api/upload/")) {
-    return `https://yuvi-backend-jkam.onrender.com${imageUrl}`;
-  }
-
-  // Otherwise, it's a local public folder image
-  return imageUrl;
-};
 // Mock data fallback
 const mockArtworks = [
   {
@@ -271,16 +248,13 @@ const ArtistPortfolio = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/testimonials`);
-      if (!response.ok) throw new Error("Failed to fetch testimonials");
-
-      const apiTestimonials = await response.json();
+      const apiTestimonials = await api.testimonialAPI.getAll();
       const apiWithPrefix = apiTestimonials.map((testimonial) => ({
         ...testimonial,
         id: testimonial.id ? `api-${testimonial.id}` : `api-${Math.random()}`,
       }));
 
-      setTestimonials([...mockTestimonials, ...apiWithPrefix]);
+      setTestimonials(apiWithPrefix);
     } catch (err) {
       console.error("Error fetching testimonials:", err);
       setTestimonials(mockTestimonials);
@@ -340,13 +314,8 @@ const ArtistPortfolio = () => {
 
       try {
         setLoading(true);
-        const artworksResponse = await fetch(`${API_BASE_URL}/artworks`);
-        if (artworksResponse.ok) {
-          const artworksData = await artworksResponse.json();
-          setArtworks([...mockArtworks, ...artworksData]);
-        } else {
-          setArtworks(mockArtworks);
-        }
+        const artworksData = await api.artworkAPI.getAll();
+        setArtworks(artworksData);
 
         await fetchTestimonials();
         setError(null);
@@ -570,16 +539,8 @@ const ArtistPortfolio = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) throw new Error("Failed to create order");
-
-      const order = await response.json();
-      alert(`Order created successfully! Order ID: ${order.id}`);
+      const order = await api.orderAPI.create(orderData);
+      alert(`Order created successfully! Order ID: ${order.id || order.data?.id}`);
       setCart([]);
       setCartOpen(false);
     } catch (err) {
@@ -1199,41 +1160,6 @@ transition-all duration-300 flex items-center gap-2"
             </p>
           </div>
 
-          {/* ✅ DEBUG INFO - Remove in production */}
-          {artworks.length > 0 && (
-            <div className="mb-8 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                <p className="text-yellow-400 font-bold">
-                  🔍 Debug Info (Remove this section in production)
-                </p>
-              </div>
-              <div className="bg-black/50 p-3 rounded overflow-auto max-h-60">
-                <p className="text-xs text-gray-400 mb-2">
-                  Total Artworks: {artworks.length} | Old Paths:{" "}
-                  {
-                    artworks.filter((a) =>
-                      a.imageUrl?.startsWith("/api/upload/"),
-                    ).length
-                  }
-                </p>
-                <pre className="text-xs text-gray-300">
-                  {JSON.stringify(
-                    artworks.slice(0, 3).map((a) => ({
-                      id: a.id,
-                      title: a.title,
-                      imageUrl: a.imageUrl,
-                      isOldPath: a.imageUrl?.startsWith("/api/upload/"),
-                      transformedUrl:
-                        getImageUrl(a.imageUrl).substring(0, 80) + "...",
-                    })),
-                    null,
-                    2,
-                  )}
-                </pre>
-              </div>
-            </div>
-          )}
 
           {/* Empty State */}
           {artworks.length === 0 ? (

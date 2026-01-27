@@ -19,6 +19,25 @@ axios.interceptors.response.use(
   }
 );
 
+// ✅ Centralized Image URL utility
+export const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return "https://placehold.co/400x300?text=Image+Not+Found";
+
+  // If it's already a full URL, return as-is
+  if (imageUrl.startsWith("http")) return imageUrl;
+
+  // If it's an API upload path, prepend backend URL
+  if (imageUrl.startsWith("/api/upload/")) {
+    const backendBase = API_BASE_URL.endsWith("/api")
+      ? API_BASE_URL.replace(/\/api$/, "")
+      : API_BASE_URL;
+    return `${backendBase}${imageUrl}`;
+  }
+
+  // Otherwise, it's a local public folder image
+  return imageUrl;
+};
+
 //
 // ==================== 🎨 ARTWORK API ====================
 //
@@ -97,7 +116,7 @@ export const artworkAPI = {
 
   getById: (id) => axios.get(`/artworks/${id}`),
   getByCategory: (category) => axios.get(`/artworks/category/${category}`),
-  
+
   create: (artworkData) => axios.post('/artworks', artworkData),
   update: (id, artworkData) => axios.put(`/artworks/${id}`, artworkData),
   delete: (id) => axios.delete(`/artworks/${id}`)
@@ -108,7 +127,7 @@ export const artworkAPI = {
 //
 export const orderAPI = {
   create: (orderData) => axios.post('/orders', orderData),
-  
+
   getById: (id) => axios.get(`/orders/${id}`),
   getByEmail: (email) => axios.get(`/orders/customer/${email}`),
   getAll: () => axios.get('/orders'),
@@ -117,8 +136,8 @@ export const orderAPI = {
     axios.post('/orders/payment/razorpay', { amount }),
   createStripePayment: (amount) =>
     axios.post('/orders/payment/stripe', { amount }),
-  
-  updateStatus: (id, status) => 
+
+  updateStatus: (id, status) =>
     axios.put(`/orders/${id}/status`, { status })
 };
 
@@ -154,7 +173,7 @@ export const testimonialAPI = {
     try {
       const response = await axios.get('/testimonials');
       const backendData = response.data || [];
-      
+
       return backendData.length > 0 ? backendData : mockTestimonials;
     } catch (error) {
       console.warn('⚠️ Using mock testimonials (backend offline)');
@@ -191,7 +210,7 @@ export const contactAPI = {
 //
 export const analyticsAPI = {
   getDashboardStats: () => axios.get('/analytics/dashboard'),
-  getSalesReport: (startDate, endDate) => 
+  getSalesReport: (startDate, endDate) =>
     axios.get(`/analytics/sales?start=${startDate}&end=${endDate}`)
 };
 

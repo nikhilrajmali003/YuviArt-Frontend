@@ -21,7 +21,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import { API_BASE_URL } from "./services/api.js";
+import api, { getImageUrl, API_BASE_URL } from "./services/api.js";
 
 const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const [artworks, setArtworks] = useState([]);
@@ -59,40 +59,13 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const fetchArtworks = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/artworks`);
-      if (response.ok) {
-        const data = await response.json();
-        setArtworks(data);
-      }
+      const data = await api.artworkAPI.getAll();
+      setArtworks(data);
     } catch (error) {
       console.error("Error:", error);
     } finally {
       setLoading(false);
     }
-  };
-  // ✅ Add this helper function at the top, after imports
-  // ✅ IMPROVED getImageUrl function
-  const getImageUrl = (imageUrl) => {
-    if (!imageUrl) {
-      return "https://via.placeholder.com/400x300?text=No+Image";
-    }
-
-    // If it's already a full Cloudinary URL, use it
-    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-      return imageUrl;
-    }
-
-    // If it's an old local path, show "Re-upload Required" placeholder
-    if (imageUrl.startsWith("/api/upload/")) {
-      console.warn("⚠️ Old local image path detected:", imageUrl);
-      console.warn(
-        "   This artwork needs to be re-uploaded through admin panel",
-      );
-      return "https://via.placeholder.com/400x300?text=Re-upload+Required&fontSize=16";
-    }
-
-    // Fallback for unexpected formats
-    return "https://via.placeholder.com/400x300?text=Invalid+Image+URL";
   };
   // Admin Panel - Fetch ALL testimonials
   // ✅ Make sure this is in your admin panel
@@ -123,16 +96,9 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   };
   const approveTestimonial = async (id) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/testimonials/${id}/approve`,
-        {
-          method: "PUT",
-        },
-      );
-      if (response.ok) {
-        // Refresh testimonials list
-        fetchAllTestimonials();
-      }
+      await api.testimonialAPI.approve(id);
+      // Refresh testimonials list
+      fetchAllTestimonials();
     } catch (error) {
       console.error("Failed to approve testimonial:", error);
     }
@@ -141,13 +107,9 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   // Admin Panel - Delete testimonial
   const deleteTestimonial = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/testimonials/${id}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        // Refresh testimonials list
-        fetchAllTestimonials();
-      }
+      await api.testimonialAPI.delete(id);
+      // Refresh testimonials list
+      fetchAllTestimonials();
     } catch (error) {
       console.error("Failed to delete testimonial:", error);
     }
@@ -162,18 +124,11 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/orders`);
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data);
-      } else {
-        console.error("Failed to fetch orders:", response.status);
-        // Set empty array if orders endpoint fails
-        setOrders([]);
-      }
+      const response = await api.orderAPI.getAll();
+      const data = response.data || response;
+      setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      // Set empty array if orders endpoint fails
       setOrders([]);
     }
   };
@@ -197,15 +152,9 @@ const EnhancedAdminPanel = ({ onLogout, onNavigateToSignup }) => {
   const deleteArtwork = async (id) => {
     if (window.confirm("Delete this artwork?")) {
       try {
-        const response = await fetch(`${API_BASE_URL}/artworks/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          showSuccess("✅ Deleted successfully!");
-          fetchArtworks();
-        } else {
-          alert("❌ Failed to delete artwork");
-        }
+        await api.artworkAPI.delete(id);
+        showSuccess("✅ Deleted successfully!");
+        fetchArtworks();
       } catch (error) {
         console.error("Error:", error);
         alert("⚠️ Error deleting artwork");
