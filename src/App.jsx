@@ -25,7 +25,6 @@ import api, { getImageUrl, API_BASE_URL } from "./services/api";
 import { mockArtworks, mockTestimonials } from "./data/mockData";
 
 // Constants
-const USE_MOCK_DATA = false;
 const FORMSPREE_FORM_ID = "mvgdadvw";
 const ARTIST_EMAIL = "yuviraj7232@gmail.com";
 
@@ -63,39 +62,33 @@ const ArtistPortfolio = () => {
 
   // --- ACTIONS ---
   const fetchTestimonials = useCallback(async () => {
-    if (USE_MOCK_DATA) {
-      setTestimonials(mockTestimonials);
-      return;
-    }
     try {
       const apiTestimonials = await api.testimonialAPI.getAll();
       const apiWithPrefix = apiTestimonials.map((testimonial) => ({
         ...testimonial,
         id: testimonial.id ? `api-${testimonial.id}` : `api-${Math.random()}`,
       }));
-      setTestimonials(apiWithPrefix);
+      // Combine API testimonials with mock data
+      setTestimonials([...apiWithPrefix, ...mockTestimonials]);
     } catch (err) {
       console.error("Error fetching testimonials:", err);
+      // Fallback to just mock data if API fails
       setTestimonials(mockTestimonials);
     }
   }, []);
 
   const fetchAllData = useCallback(async () => {
-    if (USE_MOCK_DATA) {
-      setArtworks(mockArtworks);
-      setTestimonials(mockTestimonials);
-      setLoading(false);
-      return;
-    }
     try {
       setLoading(true);
       const artworksData = await api.artworkAPI.getAll();
-      setArtworks(artworksData);
+      // Combine API artworks with mock data
+      setArtworks([...artworksData, ...mockArtworks]);
       await fetchTestimonials();
       setError(null);
     } catch (err) {
       console.error("Error fetching data:", err);
       setError(err.message);
+      // Fallback to mock data
       setArtworks(mockArtworks);
       setTestimonials(mockTestimonials);
     } finally {

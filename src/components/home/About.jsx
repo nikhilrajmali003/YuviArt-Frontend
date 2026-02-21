@@ -7,11 +7,18 @@ const About = ({ artworksCount }) => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-600/30 to-pink-600/30 rounded-3xl blur-3xl" />
-            <img
-              src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600"
-              alt="Artist"
-              className="relative rounded-3xl shadow-2xl border border-white/10"
-            />
+            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
+              <img
+                src="/images/yuviart.jpg"
+                alt="Artist Portrait"
+                className="relative w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/40 via-transparent to-transparent opacity-60" />
+            </div>
           </div>
           <div className="space-y-6">
             <h2 className="text-5xl md:text-6xl font-bold">
