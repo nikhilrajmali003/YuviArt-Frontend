@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from "react";
-import App from "./App.jsx";
+import React, { useState, useEffect, lazy, Suspense } from "react";
+import { Loader } from "lucide-react";
 
-// Admin Components
-import EnhancedAdminPanel from "./AdminPanel.jsx";
-import AdminLogin from "./AdminLogin.jsx";
-import AdminSignup from "./AdminSignup.jsx";
+// Lazy Load Components
+const App = lazy(() => import("./App.jsx"));
+const EnhancedAdminPanel = lazy(() => import("./AdminPanel.jsx"));
+const AdminLogin = lazy(() => import("./AdminLogin.jsx"));
+const AdminSignup = lazy(() => import("./AdminSignup.jsx"));
+
+// --------------------------
+// LOADING FALLBACK
+// --------------------------
+const PageLoader = () => (
+  <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="text-center">
+      <Loader className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
+      <p className="text-white text-xl">Loading...</p>
+    </div>
+  </div>
+);
 
 // --------------------------
 // ADMIN ROUTER
@@ -47,25 +60,25 @@ const AdminRouter = () => {
   const handleNavigateToLogin = () => setCurrentView("login");
 
   // View Rendering
-  if (currentView === "signup") {
-    return (
-      <AdminSignup
-        onSignupSuccess={handleNavigateToLogin}
-        onNavigateToLogin={handleNavigateToLogin}
-        setCurrentPage={setCurrentView}
-      />
-    );
-  }
-
-  if (currentView === "admin" && isAuthenticated) {
-    return <EnhancedAdminPanel onLogout={handleLogout} adminData={adminData} />;
-  }
-
   return (
-    <AdminLogin
-      onLoginSuccess={handleLoginSuccess}
-      onNavigateToSignup={handleNavigateToSignup}
-    />
+    <Suspense fallback={<PageLoader />}>
+      {currentView === "signup" && (
+        <AdminSignup
+          onSignupSuccess={handleNavigateToLogin}
+          onNavigateToLogin={handleNavigateToLogin}
+          setCurrentPage={setCurrentView}
+        />
+      )}
+      {currentView === "admin" && isAuthenticated && (
+        <EnhancedAdminPanel onLogout={handleLogout} adminData={adminData} />
+      )}
+      {currentView === "login" && (
+        <AdminLogin
+          onLoginSuccess={handleLoginSuccess}
+          onNavigateToSignup={handleNavigateToSignup}
+        />
+      )}
+    </Suspense>
   );
 };
 
@@ -75,13 +88,11 @@ const AdminRouter = () => {
 const AppRouter = () => {
   const path = window.location.pathname;
 
-  // /admin → admin router
-  if (path === "/admin") {
-    return <AdminRouter />;
-  }
-
-  // Default → client app
-  return <App />;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      {path === "/admin" ? <AdminRouter /> : <App />}
+    </Suspense>
+  );
 };
 
 export default AppRouter;
