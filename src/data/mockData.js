@@ -1,7 +1,7 @@
 export const mockArtworks = [
     {
         id: 1,
-        title: "Shree Krishn",
+        title: "Shree Krishna",
         category: "paintings",
         price: 2000,
         imageUrl: "/images/shreeKrishn.jpg",
@@ -17,7 +17,7 @@ export const mockArtworks = [
         price: 2000,
         imageUrl: "/images/radharani.jpg",
         description:
-            "Graceful and divine, this sketch captures Radha Rani ethereal beauty and pure devotion.",
+            "Graceful and divine, this sketch captures Radha Rani's ethereal beauty and pure devotion.",
         rating: 5,
         available: true,
     },
@@ -45,12 +45,12 @@ export const mockArtworks = [
     },
     {
         id: 5,
-        title: "Shree Narshing Bhagwan",
+        title: "Shree Narasimha Bhagwan",
         category: "custom",
         price: 2000,
         imageUrl: "/images/Narshing.jpg",
         description:
-            "Mythical and divine — capturing Lord Narasimha fierce power protecting his devotee Prahlad.",
+            "Mythical and divine — capturing Lord Narasimha's fierce power protecting his devotee Prahlad.",
         rating: 5,
         available: true,
     },
@@ -67,7 +67,7 @@ export const mockArtworks = [
     },
     {
         id: 7,
-        title: "Gentle Man",
+        title: "Gentleman",
         category: ["sketches", "custom", "portraits"],
         price: 2000,
         imageUrl: "/images/custom.jpg",
@@ -89,7 +89,7 @@ export const mockArtworks = [
     },
     {
         id: 9,
-        title: "Sharswati Maa",
+        title: "Saraswati Maa",
         category: "paintings",
         price: 4000,
         imageUrl: "/images/Sharswatimaa.jpg",
@@ -133,7 +133,7 @@ export const mockArtworks = [
     },
     {
         id: 13,
-        title: "Lord Ganesh",
+        title: "Lord Ganesha",
         category: "sketches",
         price: 2000,
         imageUrl: "/images/ganesh.jpg",
