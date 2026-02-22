@@ -39,15 +39,6 @@ const Testimonials = ({ testimonials, scrollToSection }) => {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <button
-            onClick={() => scrollToSection("contact")}
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
-          >
-            <MessageSquare className="w-5 h-5" />
-            Share Your Experience
-          </button>
-        </div>
       </div>
     </section>
   );
