@@ -142,11 +142,6 @@ const TestimonialForm = ({ onClose, onSuccess }) => {
         <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 shadow-lg shadow-purple-500/50 animate-pulse">
           <MessageSquare className="w-5 h-5 sm:w-7 sm:h-7 md:w-8 md:h-8" />
         </div>
-        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1.5 sm:mb-2">
-          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Share Your Experience
-          </span>
-        </h2>
         <p className="text-gray-400 text-[10px] sm:text-xs md:text-sm px-2 sm:px-4">
           Your feedback helps us grow and inspires future clients
         </p>
